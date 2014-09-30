@@ -106,8 +106,9 @@ public class LibraryWatcherImpl implements EventListener {
      */
     @Override
     public void onEvent(EventIterator it) {
-        Set<String> paths = new HashSet<>();
         Set<String> added = new HashSet<>();
+        Set<String> changed = new HashSet<>();
+        Set<String> removed = new HashSet<>();
 
         while (it.hasNext()) {
             Event event = it.nextEvent();
@@ -129,40 +130,76 @@ public class LibraryWatcherImpl implements EventListener {
                 if (type == Event.NODE_ADDED) {
                     added.add(path);
                 } else if (type == Event.NODE_REMOVED) {
-                    loadExistingLibraries();
+                    removed.add(path);
                     return;
+                } else {
+                    changed.add(path);
                 }
-
-                paths.add(path);
             } catch (RepositoryException e) {
                 // TODO: Improve error handling
                 LOGGER.error("Error processing jcr repository event", e);
             }
         }
 
-        Set<Asset> libraries = new HashSet<>();
+        for (String path : removed) {
+            Asset asset = getAssetFromPath(path);
+            if (asset != null) {
+                try {
+                    loadExistingLibraries();
+                } catch (RepositoryException e) {
+                    LOGGER.error("Unable to reload asset libraries ({})", path, e);
+                }
+                break;
+            }
+        }
+
         for (String path : added) {
             try {
                 Node node = session.getNode(path);
 
-                // TODO: Improve the logic to be more efficient
                 while (node != null && node.getDepth() > 0 && !node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
                     node = node.getParent();
                 }
 
                 if (node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                    Asset library = libraryResolver.load(node.getPath());
-                    if (library != null) {
-                        libraries.add(library);
-                    }
+                    libraryResolver.load(path);
                 }
             } catch (RepositoryException e) {
-                LOGGER.error("Unable to add new asset library ({})", path, e);
+                LOGGER.error("Unable to find asset library ({})", path, e);
             }
         }
 
         // TODO: Enable caching of the asset library (instead of always generating at runtime)
-        cacheManager.clear();
+        Set<String> all = new HashSet<>();
+        all.addAll(changed);
+        all.addAll(added);
+        for (String path : all) {
+            Asset asset = getAssetFromPath(path);
+            if (asset != null) {
+                cacheManager.clear();
+                break;
+            }
+        }
+    }
+
+    private Asset getAssetFromPath(String path) {
+        Asset asset = null;
+
+        try {
+            Node node = session.getNode(path);
+
+            while (node != null && node.getDepth() > 0 && !node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
+                node = node.getParent();
+            }
+
+            if (node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
+                asset = libraryResolver.findLibraryByPath(path);
+            }
+        } catch (RepositoryException e) {
+            LOGGER.error("Unable to find asset library ({})", path, e);
+        }
+
+        return asset;
     }
 
 }

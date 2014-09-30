@@ -50,12 +50,9 @@ public class AssetLibrary extends Asset {
         themes = new HashSet<>();
         for (Resource child : resource.getChildren()) {
             if (child.isResourceType(LibraryConstants.ASSET_THEME_TYPE_NAME)) {
-                Resource res = resource.getResourceResolver().getResource(child.getPath());
-                if (res != null) {
-                    AssetTheme theme = res.adaptTo(AssetTheme.class);
-                    if (theme != null) {
-                        themes.add(theme);
-                    }
+                AssetTheme theme = child.adaptTo(AssetTheme.class);
+                if (theme != null) {
+                    themes.add(theme);
                 }
             }
         }

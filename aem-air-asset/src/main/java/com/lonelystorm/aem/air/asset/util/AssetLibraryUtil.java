@@ -12,6 +12,9 @@ import com.lonelystorm.aem.air.asset.services.LibraryResolver;
 
 public class AssetLibraryUtil {
 
+    private AssetLibraryUtil() {
+    };
+
     public static Set<AssetLibrary> categories(LibraryResolver resolver, String categories) {
         Set<AssetLibrary> libraries = new HashSet<>();
 
@@ -46,10 +49,12 @@ public class AssetLibraryUtil {
     public static List<String> split(String text) {
         List<String> parts = new ArrayList<>();
 
-        String[] split = text.split(",");
-        if (split != null) {
-            for (String part : split) {
-                parts.add(part.trim());
+        if (text != null) {
+            String[] split = text.split(",");
+            if (split != null) {
+                for (String part : split) {
+                    parts.add(part.trim());
+                }
             }
         }
 
