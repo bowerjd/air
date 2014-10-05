@@ -9,13 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.models.impl.MockAdapter;
-import org.apache.sling.testing.resourceresolver.MockHelper;
-import org.apache.sling.testing.resourceresolver.MockResourceResolverFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.lonelystorm.aem.air.asset.models.AssetLibrary;
 import com.lonelystorm.aem.air.asset.models.AssetTheme;
+import com.lonelystorm.aem.air.asset.models.Repository;
 import com.lonelystorm.aem.air.asset.services.LibraryResolver;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,10 +31,10 @@ public class AssetLibraryUtilTest {
     private Resource resource;
 
     @Test
-    public void categories() {
-        when(resource.getPath()).thenReturn("/test/library");
-        AssetLibrary library = MockAdapter.create(resource, AssetLibrary.class);
+    public void categories() throws Exception {
+        ResourceResolver resolver = Repository.create();
 
+        AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
         List<AssetLibrary> libraries = new ArrayList<>();
         libraries.add(library);
         when(libraryResolver.findLibrariesByCategory("testing")).thenReturn(libraries);
@@ -49,26 +45,51 @@ public class AssetLibraryUtilTest {
     }
 
     @Test
+    public void categoriesNoneExistant() throws Exception {
+        List<AssetLibrary> libraries = new ArrayList<>();
+        when(libraryResolver.findLibrariesByCategory("nonExistant")).thenReturn(libraries);
+
+        Set<AssetLibrary> libs = AssetLibraryUtil.categories(libraryResolver, "nonExistant");
+        assertEquals(0, libs.size());
+    }
+
+    @Test
+    public void categoriesEmpty() throws Exception {
+        when(libraryResolver.findLibrariesByCategory("nonExistant")).thenReturn(null);
+
+        Set<AssetLibrary> libs = AssetLibraryUtil.categories(libraryResolver, "nonExistant");
+        assertEquals(0, libs.size());
+    }
+
+    @Test
     public void themes() throws Exception {
-        ResourceResolverFactory factory = new MockResourceResolverFactory();
-        ResourceResolver resolver = factory.getResourceResolver(null);
+        ResourceResolver resolver = Repository.create();
 
-        MockHelper.create(resolver)
-            .resource("/library")
-                .p("categories", new String[] { "testing" })
-                .resource("theme")
-                .p(JcrConstants.JCR_PRIMARYTYPE, LibraryConstants.ASSET_THEME_TYPE_NAME)
-        .add();
-
-        AssetLibrary library = MockAdapter.create(resolver.getResource("/library"), AssetLibrary.class);
+        AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
         Set<AssetLibrary> libraries = new HashSet<>();
         libraries.add(library);
 
-        AssetTheme theme = MockAdapter.create(resource, AssetTheme.class);
+        AssetTheme theme = resolver.getResource("/library/theme1").adaptTo(AssetTheme.class);
+        theme.equals(theme);
 
-        Set<AssetTheme> themes = AssetLibraryUtil.themes(libraryResolver, libraries, "testing");
+        Set<AssetTheme> themes = AssetLibraryUtil.themes(libraryResolver, libraries, "blue");
         assertTrue(themes.contains(theme));
         assertEquals(1, themes.size());
+    }
+
+    @Test
+    public void themesNoneExistant() throws Exception {
+        ResourceResolver resolver = Repository.create();
+
+        AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
+        Set<AssetLibrary> libraries = new HashSet<>();
+        libraries.add(library);
+
+        AssetTheme theme = resolver.getResource("/library/theme1").adaptTo(AssetTheme.class);
+        theme.equals(theme);
+
+        Set<AssetTheme> themes = AssetLibraryUtil.themes(libraryResolver, libraries, "nonExistant");
+        assertEquals(0, themes.size());
     }
 
     @Test

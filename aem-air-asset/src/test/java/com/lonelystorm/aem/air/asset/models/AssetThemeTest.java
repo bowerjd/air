@@ -1,0 +1,84 @@
+package com.lonelystorm.aem.air.asset.models;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Set;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
+
+@RunWith(MockitoJUnitRunner.class)
+public class AssetThemeTest {
+
+    private ResourceResolver resolver;
+
+    @Before
+    public void setUp() throws Exception {
+        resolver = Repository.create();
+    }
+
+    @Test
+    public void loadPaths() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        assertArrayEquals(new String[] { "/library/theme/one", "/library/theme/two" }, theme.getLoadPaths());
+    }
+
+
+    @Test
+    public void path() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        assertEquals("/library/theme1", theme.getPath());
+    }
+
+    @Test
+    public void sources() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        Set<String> sources = theme.getSources();
+        assertTrue(sources.contains("/library/theme1/theme.scss"));
+        assertEquals(1, sources.size());
+    }
+
+    @Test
+    public void categories() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        assertArrayEquals(new String[] { "blue" }, theme.getThemes());
+    }
+
+    @Test
+    public void hash() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        assertEquals(57579044, theme.hashCode());
+        assertNotEquals(theme.hashCode(), resolver.getResource("/library/theme2").adaptTo(AssetTheme.class).hashCode());
+    }
+
+    @Test
+    public void equals() {
+        Resource resource = resolver.getResource("/library/theme1");
+        AssetTheme theme = resource.adaptTo(AssetTheme.class);
+
+        assertFalse(theme.equals(null));
+        assertTrue(theme.equals(theme));
+        assertFalse(theme.equals("Testing"));
+        assertTrue(theme.equals(resolver.getResource("/library/theme1").adaptTo(AssetTheme.class)));
+        assertFalse(theme.equals(resolver.getResource("/library/theme2").adaptTo(AssetTheme.class)));
+    }
+
+}

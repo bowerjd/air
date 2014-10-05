@@ -47,6 +47,8 @@ public class PropertiesUtilTest {
         assertFalse(PropertiesUtil.comparePropertyValue(properties, "nonExistantStringValue", "String"));
         assertFalse(PropertiesUtil.comparePropertyValue(properties, "nonExistantBooleanValue", true));
         assertFalse(PropertiesUtil.comparePropertyValue(properties, "nonExistantIntValue", 30));
+
+        assertFalse(PropertiesUtil.comparePropertyValue(properties, "stringValue", 30));
     }
 
 }

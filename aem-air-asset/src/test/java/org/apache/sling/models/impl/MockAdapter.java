@@ -5,6 +5,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Hashtable;
 
+import org.apache.sling.api.adapter.AdapterManager;
+import org.apache.sling.api.adapter.SlingAdaptable;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
@@ -13,6 +15,7 @@ import org.osgi.service.component.ComponentContext;
 
 public class MockAdapter {
 
+    @Deprecated
     public static <T> T create(Resource resource, Class<T> cls) {
         ComponentContext componentContext = mock(ComponentContext.class);
         BundleContext bundleContext = mock(BundleContext.class);
@@ -27,6 +30,27 @@ public class MockAdapter {
         factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
 
         return factory.getAdapter(resource, cls);
+    }
+
+    public static void setUp() {
+        ComponentContext componentContext = mock(ComponentContext.class);
+        BundleContext bundleContext = mock(BundleContext.class);
+
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
+        when(componentContext.getProperties()).thenReturn(new Hashtable<String, Object>());
+
+        final ModelAdapterFactory factory = new ModelAdapterFactory();
+        factory.activate(componentContext);
+
+        factory.bindInjector(new SelfInjector(), new ServicePropertiesMap(1, 1));
+        factory.bindInjector(new ValueMapInjector(), new ServicePropertiesMap(2, 2));
+
+        SlingAdaptable.setAdapterManager(new AdapterManager() {
+            @Override
+            public <AdapterType> AdapterType getAdapter(Object resource, Class<AdapterType> cls) {
+                return factory.getAdapter(resource, cls);
+            }
+        });
     }
 
 }
