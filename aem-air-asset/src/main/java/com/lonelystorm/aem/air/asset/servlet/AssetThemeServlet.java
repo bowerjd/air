@@ -24,13 +24,13 @@ public class AssetThemeServlet extends SlingSafeMethodsServlet {
      * Asset Library Compiler
      */
     @Reference
-    private CompilerManager compilerManager;
+    private transient CompilerManager compilerManager;
 
     /**
      * Asset Library Resolver
      */
     @Reference
-    private LibraryResolver libraryResolver;
+    private transient LibraryResolver libraryResolver;
 
     /**
      * {@inheritDoc}
@@ -44,6 +44,7 @@ public class AssetThemeServlet extends SlingSafeMethodsServlet {
             response.sendError(404, String.format("Unable to render library (%s)", resourcePath));
         } else {
             response.setCharacterEncoding("UTF-8");
+            response.setContentType("text/css;charset=UTF-8");
 
             String code = compilerManager.compile(library);
             response.getWriter().append(code);

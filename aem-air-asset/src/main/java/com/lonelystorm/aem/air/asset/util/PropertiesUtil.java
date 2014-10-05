@@ -11,12 +11,13 @@ public class PropertiesUtil {
         return properties.containsKey(key);
     }
 
-    public static <T extends Object> boolean comparePropertyValue(ValueMap properties, String key, T value) {
-        if (properties.containsKey(key) && properties.get(key, value.getClass()).equals(value)) {
-            return true;
-        } else {
-            return false;
+    public static <T extends Object> boolean comparePropertyValue(ValueMap properties, String key, T expected) {
+        if (containsProperty(properties, key)) {
+            Object value = properties.get(key, expected.getClass());
+            return expected.equals(value);
         }
+
+        return false;
     }
 
 }

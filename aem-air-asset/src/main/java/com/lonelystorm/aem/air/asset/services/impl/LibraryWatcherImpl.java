@@ -161,8 +161,8 @@ public class LibraryWatcherImpl implements EventListener {
                     node = node.getParent();
                 }
 
-                if (node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                    libraryResolver.load(path);
+                if (node != null && node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
+                    libraryResolver.load(node.getPath());
                 }
             } catch (RepositoryException e) {
                 LOGGER.error("Unable to find asset library ({})", path, e);
@@ -192,8 +192,8 @@ public class LibraryWatcherImpl implements EventListener {
                 node = node.getParent();
             }
 
-            if (node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                asset = libraryResolver.findLibraryByPath(path);
+            if (node != null && node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
+                asset = libraryResolver.findLibraryByPath(node.getPath());
             }
         } catch (RepositoryException e) {
             LOGGER.error("Unable to find asset library ({})", path, e);

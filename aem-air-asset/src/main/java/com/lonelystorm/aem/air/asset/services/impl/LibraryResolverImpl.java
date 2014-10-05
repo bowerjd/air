@@ -27,13 +27,15 @@ public class LibraryResolverImpl implements LibraryResolver {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
-    private Map<String, AssetLibrary> libraries;
+    private volatile Map<String, AssetLibrary> libraries;
 
-    private Map<String, AssetLibrary> sources;
+    private volatile Map<String, AssetLibrary> sources;
 
-    private Map<String, List<AssetLibrary>> categories;
+    private volatile Map<String, List<AssetLibrary>> categories;
 
-    private Map<String, AssetTheme> themes;
+    private volatile Map<String, AssetTheme> themes;
+
+    private volatile Map<String, List<AssetTheme>> themesCategories;
 
     @Activate
     public void activate(ComponentContext context) {
@@ -42,6 +44,7 @@ public class LibraryResolverImpl implements LibraryResolver {
         categories = new TreeMap<>();
 
         themes = new TreeMap<>();
+        themesCategories = new TreeMap<>();
     }
 
     @Override
@@ -98,6 +101,13 @@ public class LibraryResolverImpl implements LibraryResolver {
 
             for (AssetTheme theme : library.getThemes()) {
                 themes.put(theme.getPath(), theme);
+
+                for (String category : theme.getThemes()) {
+                    if (!themesCategories.containsKey(category)) {
+                        themesCategories.put(category, new ArrayList<AssetTheme>());
+                    }
+                    themesCategories.get(category).add(theme);
+                }
             }
         }
     }
@@ -134,6 +144,13 @@ public class LibraryResolverImpl implements LibraryResolver {
     public AssetTheme findThemeByPath(String path) {
         synchronized (this) {
             return themes.get(path);
+        }
+    }
+
+    @Override
+    public List<AssetTheme> findThemesByTheme(String theme) {
+        synchronized (this) {
+            return themesCategories.get(theme);
         }
     }
 

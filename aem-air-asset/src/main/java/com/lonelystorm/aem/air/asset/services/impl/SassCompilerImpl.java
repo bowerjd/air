@@ -23,11 +23,8 @@ import org.jruby.embed.LocalVariableBehavior;
 import org.jruby.embed.osgi.OSGiScriptingContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.lonelystorm.aem.air.asset.models.Asset;
-import com.lonelystorm.aem.air.asset.models.AssetLibrary;
 import com.lonelystorm.aem.air.asset.services.Compiler;
 import com.lonelystorm.aem.air.asset.util.EscalatedResolver;
 
@@ -40,7 +37,7 @@ public class SassCompilerImpl implements Compiler {
 
     private Bundle bundle;
 
-    private OSGiScriptingContainer container;
+    private volatile OSGiScriptingContainer container;
 
     @Activate
     public void activate(ComponentContext context) {
@@ -82,7 +79,7 @@ public class SassCompilerImpl implements Compiler {
         return false;
     }
 
-    public String include(AssetLibrary library, String file) {
+    public String include(Asset library, String file) {
         String path = FilenameUtils.getPath(file);
         String filename = FilenameUtils.getBaseName(file);
         final String normalizedPath = FilenameUtils.normalize(String.format("/%s/_%s.scss/jcr:content", path, filename), true);

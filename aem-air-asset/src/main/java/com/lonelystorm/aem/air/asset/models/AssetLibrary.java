@@ -1,5 +1,6 @@
 package com.lonelystorm.aem.air.asset.models;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,9 +8,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.Model;
-import org.apache.sling.models.annotations.Optional;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
 import com.lonelystorm.aem.air.asset.util.LibraryConstants;
@@ -23,23 +22,14 @@ public class AssetLibrary extends Asset {
     @Inject
     private String[] categories;
 
-    @Inject
-    @Optional
-    @Default(values = {})
-    private String[] embed;
-
     private Set<AssetTheme> themes;
 
     public String[] getCategories() {
-        return categories;
-    }
-
-    public String[] getEmbed() {
-        return embed;
+        return categories.clone();
     }
 
     public Set<AssetTheme> getThemes() {
-        return themes;
+        return Collections.unmodifiableSet(themes);
     }
 
     @PostConstruct

@@ -1,7 +1,6 @@
 package com.lonelystorm.aem.air.asset.tags;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.jsp.JspWriter;
@@ -14,14 +13,14 @@ import org.apache.sling.scripting.jsp.util.TagUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import tldgen.BodyContentType;
+import tldgen.Tag;
+import tldgen.TagAttribute;
+
 import com.lonelystorm.aem.air.asset.models.AssetLibrary;
 import com.lonelystorm.aem.air.asset.models.AssetTheme;
 import com.lonelystorm.aem.air.asset.services.LibraryResolver;
 import com.lonelystorm.aem.air.asset.util.AssetLibraryUtil;
-
-import tldgen.BodyContentType;
-import tldgen.Tag;
-import tldgen.TagAttribute;
 
 @Tag(bodyContentType = BodyContentType.EMPTY)
 public class IncludeAssetLibrary extends TagSupport {

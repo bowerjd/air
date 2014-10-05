@@ -24,6 +24,7 @@ import org.apache.sling.api.resource.ValueMap;
 
 import com.lonelystorm.aem.air.asset.models.Asset;
 import com.lonelystorm.aem.air.asset.models.AssetLibrary;
+import com.lonelystorm.aem.air.asset.models.AssetTheme;
 import com.lonelystorm.aem.air.asset.services.CacheManager;
 import com.lonelystorm.aem.air.asset.services.Compiler;
 import com.lonelystorm.aem.air.asset.services.CompilerManager;
@@ -81,6 +82,14 @@ public class CompilerManagerImpl implements CompilerManager {
                 List<AssetLibrary> libs = libraryResolver.findLibrariesByCategory(embed);
                 for (AssetLibrary lib : libs) {
                     compile(lib, compiled);
+                }
+            }
+        } else if (library instanceof AssetTheme) {
+            AssetTheme folder = (AssetTheme) library;
+            for (String embed : folder.getEmbed()) {
+                List<AssetTheme> themes = libraryResolver.findThemesByTheme(embed);
+                for (AssetTheme theme : themes) {
+                    compile(theme, compiled);
                 }
             }
         }

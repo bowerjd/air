@@ -28,22 +28,23 @@ public class AssetLibraryUtil {
         return libraries;
     }
 
-    public static Set<AssetTheme> themes(LibraryResolver resolver, Set<AssetLibrary> categories, String themes) {
-        List<String> sThemes = split(themes);
-        Set<AssetTheme> libraries = new HashSet<>();
+    public static Set<AssetTheme> themes(LibraryResolver resolver, Set<AssetLibrary> libraries, String categories) {
+        List<String> splitCategories = split(categories);
+        Set<AssetTheme> results = new HashSet<>();
 
-        for (AssetLibrary category : categories) {
-            Set<AssetTheme> categoryThemes = category.getThemes();
-            for (AssetTheme categoryTheme : categoryThemes) {
-                for (String theme : sThemes) {
-                    if (Arrays.asList(categoryTheme.getThemes()).contains(theme)) {
-                        libraries.add(categoryTheme);
+        for (AssetLibrary library : libraries) {
+            Set<AssetTheme> themes = library.getThemes();
+            for (AssetTheme theme : themes) {
+                for (String category : splitCategories) {
+                    if (Arrays.asList(theme.getThemes()).contains(category)) {
+                        results.add(theme);
                     }
                 }
             }
+
         }
 
-        return libraries;
+        return results;
     }
 
     public static List<String> split(String text) {
@@ -51,10 +52,8 @@ public class AssetLibraryUtil {
 
         if (text != null) {
             String[] split = text.split(",");
-            if (split != null) {
-                for (String part : split) {
-                    parts.add(part.trim());
-                }
+            for (String part : split) {
+                parts.add(part.trim());
             }
         }
 

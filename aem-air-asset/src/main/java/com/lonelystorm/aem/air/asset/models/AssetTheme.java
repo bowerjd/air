@@ -17,7 +17,7 @@ public class AssetTheme extends Asset {
     private String[] themes;
 
     public String[] getThemes() {
-        return themes;
+        return themes.clone();
     }
 
     @PostConstruct
