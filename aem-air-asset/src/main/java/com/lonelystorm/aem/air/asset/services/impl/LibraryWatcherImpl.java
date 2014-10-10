@@ -21,6 +21,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.jackrabbit.util.Text;
+import org.apache.sling.api.adapter.AdapterFactory;
 import org.apache.sling.jcr.api.SlingRepository;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -39,6 +40,9 @@ import com.lonelystorm.aem.air.asset.util.LibraryConstants;
 public class LibraryWatcherImpl implements EventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryWatcherImpl.class);
+
+    @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.aem.air.asset.models.AssetLibrary)")
+    private AdapterFactory adaptorFactory;
 
     @Reference
     private SlingRepository repository;
