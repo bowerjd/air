@@ -33,7 +33,6 @@ public class AssetLibraryTest {
         assertArrayEquals(new String[] { "/library/one", "/library/two" }, library.getLoadPaths());
     }
 
-
     @Test
     public void path() {
         Resource resource = resolver.getResource("/library");
@@ -87,7 +86,7 @@ public class AssetLibraryTest {
         Resource resource = resolver.getResource("/library");
         AssetLibrary library = resource.adaptTo(AssetLibrary.class);
 
-        assertEquals(-1371711113, library.hashCode());
+        assertEquals(473915851, library.hashCode());
         assertNotEquals(library.hashCode(), resolver.getResource("/library2").adaptTo(AssetLibrary.class).hashCode());
     }
 

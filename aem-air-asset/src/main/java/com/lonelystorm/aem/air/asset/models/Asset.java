@@ -2,6 +2,7 @@ package com.lonelystorm.aem.air.asset.models;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -93,7 +94,7 @@ public abstract class Asset {
      */
     @Override
     public int hashCode() {
-        return getClass().getSimpleName().hashCode() + ((path == null) ? 0 : path.hashCode());
+        return Objects.hash(path);
     }
 
     /**

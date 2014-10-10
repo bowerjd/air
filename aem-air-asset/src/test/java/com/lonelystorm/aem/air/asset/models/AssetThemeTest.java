@@ -33,7 +33,6 @@ public class AssetThemeTest {
         assertArrayEquals(new String[] { "/library/theme/one", "/library/theme/two" }, theme.getLoadPaths());
     }
 
-
     @Test
     public void path() {
         Resource resource = resolver.getResource("/library/theme1");
@@ -65,7 +64,7 @@ public class AssetThemeTest {
         Resource resource = resolver.getResource("/library/theme1");
         AssetTheme theme = resource.adaptTo(AssetTheme.class);
 
-        assertEquals(57579044, theme.hashCode());
+        assertEquals(239847786, theme.hashCode());
         assertNotEquals(theme.hashCode(), resolver.getResource("/library/theme2").adaptTo(AssetTheme.class).hashCode());
     }
 

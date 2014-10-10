@@ -9,7 +9,7 @@
     <parent>
         <groupId>com.lonelystorm.opensource</groupId>
         <artifactId>aem-air</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -18,7 +18,7 @@
     <artifactId>aem-air-asset</artifactId>
     <packaging>bundle</packaging>
     <name>LonelyStorm AEM Air - Asset Library</name>
-    <description>...</description>
+    <description>Asset compiler to generate CSS from SASS</description>
 
     <!-- ====================================================================== -->
     <!-- B U I L D -->
