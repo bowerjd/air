@@ -2,7 +2,7 @@
 require 'java'
 require 'sass'
 
-java_import 'com.lonelystorm.aem.air.asset.services.impl.SassCompilerImpl'
+java_import 'com.lonelystorm.air.asset.services.impl.SassCompilerImpl'
 
 # https://github.com/sass/sass/blob/stable/lib/sass/importers/filesystem.rb
 module Sass
