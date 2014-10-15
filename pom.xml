@@ -6,21 +6,51 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N -->
     <!-- ====================================================================== -->
-    <groupId>com.lonelystorm.opensource</groupId>
-    <artifactId>aem-air</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <groupId>com.lonelystorm.air</groupId>
+    <artifactId>air-parent</artifactId>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>LonelyStorm AEM Air - Reactor</name>
-    <description>Reactor project for LonelyStorm AEM Air</description>
-
-    <url>https://github.com/LonelyStorm/aem-air</url>
+    <name>LonelyStorm Air - Reactor</name>
+    <description>Reactor (parent) project for all LonelyStorm Air modules.</description>
+    <url>https://github.com/LonelyStorm/air</url>
     <inceptionYear>2014</inceptionYear>
 
     <organization>
         <name>LonelyStorm</name>
-        <url>http://www.lonelystorm.com/</url>
+        <url>http://www.lonelystorm.com</url>
     </organization>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>James Bodkin</name>
+            <organization>LonelyStorm</organization>
+            <organizationUrl>http://www.lonelystorm.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/LonelyStorm/air.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/LonelyStorm/air.git</developerConnection>
+        <url>https://github.com/LonelyStorm/air</url>
+    </scm>
+
+    <issueManagement>
+        <system>Github Issues</system>
+        <url>https://github.com/LonelyStorm/air/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Travis-ci</system>
+        <url>https://travis-ci.org/LonelyStorm/air</url>
+    </ciManagement>
 
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
@@ -34,7 +64,9 @@
     </properties>
 
     <modules>
-        <module>aem-air-asset</module>
+        <module>air-util</module>
+        <module>air-asset</module>
+        <module>air-component</module>
     </modules>
 
     <!-- ====================================================================== -->
@@ -64,8 +96,29 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.4</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>2.10</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
@@ -80,6 +133,7 @@
                     </dependencies>
                     <executions>
                         <execution>
+                            <id>generate-scr-descriptor</id>
                             <goals>
                                 <goal>scr</goal>
                             </goals>
@@ -103,26 +157,26 @@
                     <version>0.7.2.201409121644</version>
                     <executions>
                         <execution>
-                            <id>default-instrument</id>
+                            <id>jacoco-instrument</id>
                             <goals>
                                 <goal>instrument</goal>
                             </goals>
                         </execution>
                         <execution>
-                            <id>default-restore</id>
+                            <id>jacoco-restore</id>
                             <goals>
                                 <goal>restore-instrumented-classes</goal>
                             </goals>
                         </execution>
                         <execution>
-                            <id>default-report</id>
+                            <id>jacoco-report</id>
                             <phase>prepare-package</phase>
                             <goals>
                                 <goal>report</goal>
                             </goals>
                         </execution>
                         <execution>
-                            <id>default-check</id>
+                            <id>jacoco-check</id>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -133,9 +187,9 @@
                                         <element>BUNDLE</element>
                                         <limits>
                                             <limit implementation="org.jacoco.report.check.Limit">
-                                                <counter>INSTRUCTION</counter>
+                                                <counter>CLASS</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.80</minimum>
+                                                <maximum>0.80</maximum>
                                             </limit>
                                             <limit implementation="org.jacoco.report.check.Limit">
                                                 <counter>CLASS</counter>
@@ -155,7 +209,7 @@
                     <version>3.0.0</version>
                     <executions>
                         <execution>
-                            <id>default-check</id>
+                            <id>findbugs-check</id>
                             <phase>compile</phase>
                             <goals>
                                 <goal>check</goal>
@@ -209,6 +263,25 @@
     <!-- ====================================================================== -->
     <dependencyManagement>
         <dependencies>
+            <!-- Project -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>air-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>air-asset</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>air-component</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <!-- OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -309,6 +382,18 @@
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.6</version>
+            </dependency>
+
+            <!-- Jackson -->
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>1.9.13</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+                <version>1.9.13</version>
             </dependency>
 
             <!-- TLD Generator -->
