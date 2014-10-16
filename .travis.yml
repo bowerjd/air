@@ -1,6 +1,21 @@
 language: java
-
 jdk:
   - oraclejdk8
   - oraclejdk7
   - openjdk7
+
+after_success:
+  - "./build.sh"
+
+deploy:
+  provider: releases
+  api_key:
+    secure: aBYrIqfhXWExsXTgbo48jZC4iX3BuwNqixfLCWlfozY/VElMyiz4GvJnon1LYYYqhjC97zUc80P91UMcVELCKmI/9qhcINTs/mDXc8EpgLI4c4npDLbC7ZQ3oAJ5FwZczfQPzRwSIpKIMNGugpZc7tITZ/RL6lrBGRLfZUK9qco=
+  file:
+    - "${PKG_AIR_ASSET}"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    jdk: oraclejdk8
+    repo: LonelyStorm/air
