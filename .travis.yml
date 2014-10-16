@@ -20,3 +20,8 @@ deploy:
     all_branches: true
     jdk: oraclejdk8
     repo: LonelyStorm/air
+
+#after_success:
+#  - echo "TODO Settings.xml"
+#  - test $TRAVIS_SECURE_ENV_VARS == "true" && test $TRAVIS_BRANCH == "master" && mvn deploy -Prelease
+#  - echo "TODO Deploy tag"
