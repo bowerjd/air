@@ -52,6 +52,17 @@
         <url>https://travis-ci.org/LonelyStorm/air</url>
     </ciManagement>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+    </distributionManagement>
+
     <!-- ====================================================================== -->
     <!-- P R O P E R T I E S -->
     <!-- ====================================================================== -->
@@ -189,7 +200,7 @@
                                             <limit implementation="org.jacoco.report.check.Limit">
                                                 <counter>CLASS</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <maximum>0.80</maximum>
+                                                <minimum>0.80</minimum>
                                             </limit>
                                             <limit implementation="org.jacoco.report.check.Limit">
                                                 <counter>CLASS</counter>
@@ -210,12 +221,42 @@
                     <executions>
                         <execution>
                             <id>findbugs-check</id>
-                            <phase>compile</phase>
+                            <phase>test</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>1.5</version>
+                    <configuration>
+                        <defaultKeyring>false</defaultKeyring>
+                        <publicKeyring>${basedir}/../public.gpg</publicKeyring>
+                        <secretKeyring>${basedir}/../private.gpg</secretKeyring>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.6.4</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <serverId>ossrh</serverId>
+                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                        <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
