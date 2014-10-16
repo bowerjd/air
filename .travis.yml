@@ -4,12 +4,16 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+before_install:
+  - openssl aes-256-cbc -K $encrypted_71c129881162_key -iv $encrypted_71c129881162_iv -in ./private.gpg.enc -out ./private.gpg -d
+  - openssl aes-256-cbc -K $encrypted_71c129881162_key -iv $encrypted_71c129881162_iv -in ./public.gpg.enc -out ./public.gpg -d
+
 deploy:
   provider: releases
   api_key:
     secure: aBYrIqfhXWExsXTgbo48jZC4iX3BuwNqixfLCWlfozY/VElMyiz4GvJnon1LYYYqhjC97zUc80P91UMcVELCKmI/9qhcINTs/mDXc8EpgLI4c4npDLbC7ZQ3oAJ5FwZczfQPzRwSIpKIMNGugpZc7tITZ/RL6lrBGRLfZUK9qco=
   file_glob: true
-  file: air-util/target/*.jar
+  file: ./air-util/target/*.jar
   skip_cleanup: true
   on:
     tags: true
