@@ -5,8 +5,8 @@ jdk:
   - openjdk7
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_71c129881162_key -iv $encrypted_71c129881162_iv -in ./private.gpg.enc -out ./private.gpg -d
-  - openssl aes-256-cbc -K $encrypted_71c129881162_key -iv $encrypted_71c129881162_iv -in ./public.gpg.enc -out ./public.gpg -d
+  - openssl enc -aes-256-cbc -d -a -in private.gpg.enc -out private.gpg -K $OPENSSL_KEY -iv $OPENSSL_IV -S $OPENSSL_SALT
+  - openssl enc -aes-256-cbc -d -a -in public.gpg.enc -out public.gpg -K $OPENSSL_KEY -iv $OPENSSL_IV -S $OPENSSL_SALT
 
 deploy:
   provider: releases
