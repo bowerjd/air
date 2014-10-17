@@ -49,7 +49,7 @@ public class BsonPostProcessorImpl implements SlingPostProcessor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BsonPostProcessorImpl.class);
 
-    public static final String PREFIX_TAB_NAME = ":aem-air:bson@";
+    public static final String PREFIX_TAB_NAME = ":lonelystorm.air:bson@";
 
     @Override
     public void process(SlingHttpServletRequest slingHttpServletRequest, List<Modification> modifications) throws Exception {
@@ -115,7 +115,7 @@ public class BsonPostProcessorImpl implements SlingPostProcessor {
 
                 try {
                     BsonIdentifier bson = BsonIdentifier.fromProperty(identifier);
-                    names.add(bson.getId());
+                    names.add(bson.getBsonId());
                 } catch (IOException e) {
                     LOGGER.error("Error converting property to bson identifier", e);
                 }

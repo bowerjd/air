@@ -28,8 +28,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.lonelystorm.air.component.services.impl.BsonPostProcessorImpl;
-
 @RunWith(MockitoJUnitRunner.class)
 public class BsonPostProcessorImplTest {
 
@@ -47,7 +45,7 @@ public class BsonPostProcessorImplTest {
 
         MockHelper.create(resolver)
             .resource("/bson")
-                .p("children", new String[] { "{\"id\": \"a\"}", "{\"id\": \"d\"}", "invalid" })
+                .p("children", new String[] { "{\"bsonId\": \"a\"}", "{\"bsonId\": \"d\"}", "invalid" })
             .resource("/bson/empty")
             .resource("/bson/a")
                 .p("jcr:primaryType", "nt:unstructured")
@@ -63,9 +61,9 @@ public class BsonPostProcessorImplTest {
         .commit();
 
         Map<String, String[]> parameters = new TreeMap<String, String[]>();
-        parameters.put(":aem-air:bson@children", new String[] { "foundation/components/parsys" });
-        parameters.put(":aem-air:bson@invalid", null);
-        parameters.put(":aem-air:bson@empty", new String[] {});
+        parameters.put(":lonelystorm.air:bson@children", new String[] { "foundation/components/parsys" });
+        parameters.put(":lonelystorm.air:bson@invalid", null);
+        parameters.put(":lonelystorm.air:bson@empty", new String[] {});
         parameters.put("dialog", new String[] { "/apps/aem-air/test" });
         when(slingHttpServletRequest.getParameterMap()).thenReturn(parameters);
 
