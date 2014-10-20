@@ -21,7 +21,5 @@ deploy:
     jdk: oraclejdk8
     repo: LonelyStorm/air
 
-#after_success:
-#  - echo "TODO Settings.xml"
-#  - test $TRAVIS_SECURE_ENV_VARS == "true" && test $TRAVIS_BRANCH == "master" && mvn deploy -Prelease
-#  - echo "TODO Deploy tag"
+after_success:
+  - test $TRAVIS_SECURE_ENV_VARS == "true" && test $TRAVIS_BRANCH == "master" && test $TRAVIS_JDK_VERSION == "oraclejdk8" && mvn deploy --settings="./settings.xml" -Prelease
