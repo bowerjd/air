@@ -4,6 +4,9 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+env:
+  - secure: "C487oZ9IG4zlJa2UskW1Qfppejj8j35+eTi3mHr/0oC9czM/9ceS6vOJoeOhehwDGgJ8AA/9USn+srYJAx+9qeWvomLi5zGt422Ob2lI1L/O7snzWJJw5FRPFEC0KX+YuAaC2VsThUxy7SZsffDEIfBB5AcGL95Pl+8sfSQVn7I="
+
 before_install:
   - openssl enc -aes-256-cbc -d -a -in private.gpg.enc -out private.gpg -K $OPENSSL_KEY -iv $OPENSSL_IV -S $OPENSSL_SALT
   - openssl enc -aes-256-cbc -d -a -in public.gpg.enc -out public.gpg -K $OPENSSL_KEY -iv $OPENSSL_IV -S $OPENSSL_SALT
