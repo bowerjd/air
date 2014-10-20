@@ -1,0 +1,5 @@
+#base=source
+
+widgets/bsonid.js
+widgets/bsonitem.js
+widgets/bsonmultifield.js
