@@ -202,8 +202,6 @@
                     <version>1.5</version>
                     <configuration>
                         <defaultKeyring>false</defaultKeyring>
-                        <publicKeyring>${basedir}/../public.gpg</publicKeyring>
-                        <secretKeyring>${basedir}/../private.gpg</secretKeyring>
                     </configuration>
                     <executions>
                         <execution>
@@ -265,13 +263,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-            </plugin>
-        </plugins>
     </build>
 
     <!-- ====================================================================== -->
@@ -453,6 +444,27 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- ====================================================================== -->
+    <!-- P R O F I L E S -->
+    <!-- ====================================================================== -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <!-- ====================================================================== -->
     <!-- R E P O S I T O R I E S -->

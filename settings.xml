@@ -13,6 +13,8 @@
             <id>gpg</id>
             <properties>
                 <gpg.passphrase>${env.OSSRH_PASSWORD}</gpg.passphrase>
+                <gpg.publicKeyring>${env.TRAVIS_BUILD_DIR}/public.gpg</gpg.publicKeyring>
+                <gpg.secretKeyring>${env.TRAVIS_BUILD_DIR}/private.gpg</gpg.secretKeyring>
             </properties>
         </profile>
     </profiles>
