@@ -39,8 +39,8 @@
         <connection>scm:git:git://github.com/LonelyStorm/air.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/LonelyStorm/air.git</developerConnection>
         <url>https://github.com/LonelyStorm/air</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <issueManagement>
         <system>Github Issues</system>
