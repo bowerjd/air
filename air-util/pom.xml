@@ -131,18 +131,6 @@
             <artifactId>commons-lang</artifactId>
         </dependency>
 
-        <!-- Jackson -->
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-        </dependency>
-
-        <!-- TLD Generator -->
-        <dependency>
-            <groupId>com.google.code.tld-generator</groupId>
-            <artifactId>tld-generator</artifactId>
-        </dependency>
-
         <!-- Testing -->
         <dependency>
             <groupId>junit</groupId>
