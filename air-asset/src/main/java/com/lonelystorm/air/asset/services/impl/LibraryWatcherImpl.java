@@ -42,7 +42,10 @@ public class LibraryWatcherImpl implements EventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(LibraryWatcherImpl.class);
 
     @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetLibrary)")
-    private AdapterFactory adaptorFactory;
+    private AdapterFactory libraryAdaptorFactory;
+
+    @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetTheme)")
+    private AdapterFactory themeAdaptorFactory;
 
     @Reference
     private SlingRepository repository;
