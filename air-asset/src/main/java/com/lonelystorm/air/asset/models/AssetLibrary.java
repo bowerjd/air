@@ -11,6 +11,7 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 
+import com.lonelystorm.air.asset.services.LibraryAdapterManager;
 import com.lonelystorm.air.asset.util.LibraryConstants;
 
 @Model(adaptables = Resource.class)
@@ -21,6 +22,9 @@ public class AssetLibrary extends Asset {
 
     @Inject
     private String[] categories;
+
+    @Inject
+    private LibraryAdapterManager libraryAdapterManager;
 
     private Set<AssetTheme> themes;
 
@@ -40,7 +44,7 @@ public class AssetLibrary extends Asset {
         themes = new HashSet<>();
         for (Resource child : resource.getChildren()) {
             if (child.isResourceType(LibraryConstants.ASSET_THEME_TYPE_NAME)) {
-                AssetTheme theme = child.adaptTo(AssetTheme.class);
+                AssetTheme theme = libraryAdapterManager.theme(child);
                 if (theme != null) {
                     themes.add(theme);
                 }

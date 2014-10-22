@@ -17,12 +17,16 @@ import org.osgi.service.component.ComponentContext;
 import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.services.LibraryAdapterManager;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 import com.lonelystorm.air.util.EscalatedResolver;
 
 @Component
 @Service
 public class LibraryResolverImpl implements LibraryResolver {
+
+    @Reference
+    private LibraryAdapterManager libraryAdapterManager;
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -56,7 +60,7 @@ public class LibraryResolverImpl implements LibraryResolver {
             public AssetLibrary run(ResourceResolver resolver) {
                 Resource resource = resolver.getResource(path);
                 if (resource != null) {
-                    AssetLibrary library = resource.adaptTo(AssetLibrary.class);
+                    AssetLibrary library = libraryAdapterManager.library(resource);
                     return library;
                 }
 
