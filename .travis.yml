@@ -26,4 +26,4 @@ deploy:
     repo: LonelyStorm/air
 
 after_success:
-  - test $TRAVIS_SECURE_ENV_VARS == "true" && test $TRAVIS_BRANCH == "master" && test $TRAVIS_JDK_VERSION == "oraclejdk8" && mvn deploy --settings="./settings.xml" -Prelease
+  - test $TRAVIS_SECURE_ENV_VARS == "true" && test $TRAVIS_BRANCH == "master" && test $TRAVIS_JDK_VERSION == "oraclejdk8" && javac ./Setup.java && java Setup && mvn deploy -Prelease
