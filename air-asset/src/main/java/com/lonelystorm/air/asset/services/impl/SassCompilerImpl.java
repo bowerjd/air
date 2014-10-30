@@ -39,32 +39,24 @@ public class SassCompilerImpl implements Compiler {
 
     private volatile OSGiScriptingContainer container;
 
+    private volatile Object receiver;
+
     @Activate
     public void activate(ComponentContext context) {
         bundle = context.getBundleContext().getBundle();
-        container = new OSGiScriptingContainer(bundle, LocalContextScope.SINGLETHREAD, LocalVariableBehavior.PERSISTENT);
+        container = new OSGiScriptingContainer(bundle, LocalContextScope.CONCURRENT, LocalVariableBehavior.TRANSIENT);
 
         final List<String> paths = container.getLoadPaths();
         paths.add("gems/sass-3.4.5/lib");
         container.setLoadPaths(paths);
 
-        synchronized (this) {
-            container.put("$service", this);
-            container.runScriptlet(bundle, "scripts/setup.rb");
-        }
+        container.put("$service", this);
+        receiver = container.runScriptlet(bundle, "scripts/setup.rb");
     }
 
     @Override
     public String compile(Asset library, String file, String source) {
-        synchronized (this) {
-            container.put("$library", library);
-            container.put("$content", source);
-            container.put("$filename", library.getPath() + "/sass.scss");
-            container.put("$loadPaths", library.getLoadPaths());
-            container.runScriptlet(bundle, "scripts/compile.rb");
-
-            return container.get("result").toString();
-        }
+        return (String) container.callMethod(receiver, "compile", source, library.getPath() + "/sass.scss", library.getLoadPaths());
     }
 
     @Override
@@ -79,7 +71,7 @@ public class SassCompilerImpl implements Compiler {
         return false;
     }
 
-    public String include(Asset library, String file) {
+    public String include(String file) {
         String path = FilenameUtils.getPath(file);
         String filename = FilenameUtils.getBaseName(file);
         final String normalizedPath = FilenameUtils.normalize(String.format("/%s/_%s.scss/jcr:content", path, filename), true);

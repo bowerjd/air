@@ -49,6 +49,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
+                        <Import-Package>!sun.misc, *</Import-Package>
                         <Bundle-ClassPath>.,{maven-dependencies},gems/sass.jar</Bundle-ClassPath>
                         <Sling-Model-Packages>com.lonelystorm.air.asset.models</Sling-Model-Packages>
                     </instructions>
@@ -148,6 +149,12 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
+        </dependency>
+
+        <!-- Guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <!-- TLD Generator -->

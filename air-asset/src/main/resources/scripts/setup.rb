@@ -39,7 +39,7 @@ module Sass
             end
 
             def _find(dir, name, options)
-                content = $service.include($library, dir + "/" + name)
+                content = $service.include(dir + "/" + name)
                 return unless content
 
                 options[:importer] = self
@@ -49,4 +49,17 @@ module Sass
             end
         end
     end
+end
+
+def compile(content, filename, loadPaths)
+    engine = Sass::Engine.new(content, {
+        :style => :compressed,
+        :cache => false,
+        :filename => filename,
+        :load_paths => loadPaths,
+        :syntax => :scss,
+        :filesystem_importer => Sass::Importers::ImportAemRepository
+    })
+
+    return engine.render()
 end
