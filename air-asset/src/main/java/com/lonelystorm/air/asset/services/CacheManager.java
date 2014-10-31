@@ -1,6 +1,5 @@
 package com.lonelystorm.air.asset.services;
 
-import com.lonelystorm.air.asset.models.Asset;
 
 public interface CacheManager {
 
@@ -9,7 +8,5 @@ public interface CacheManager {
     String get(String path);
 
     void clear();
-
-    void clear(Asset asset);
 
 }

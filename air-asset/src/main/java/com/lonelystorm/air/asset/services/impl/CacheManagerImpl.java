@@ -21,7 +21,6 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.ComponentContext;
 
-import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.services.CacheManager;
 import com.lonelystorm.air.asset.util.PropertiesUtil;
 import com.lonelystorm.air.util.EscalatedResolver;
@@ -155,11 +154,6 @@ public class CacheManagerImpl implements CacheManager {
 
             });
         }
-    }
-
-    @Override
-    public void clear(Asset asset) {
-        // TODO: Selective cache clear
     }
 
 }
