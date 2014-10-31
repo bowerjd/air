@@ -138,7 +138,7 @@ public class SassCompilerImpl implements Compiler {
 
             if (matcher.matches()) {
                 String file = matcher.group(3);
-                int lineNumber = Integer.valueOf(matcher.group(2));
+                int lineNumber = Integer.parseInt(matcher.group(2));
 
                 StackTraceElement element = new StackTraceElement("SassCompiler", "compile", file, lineNumber);
                 elements.add(element);
