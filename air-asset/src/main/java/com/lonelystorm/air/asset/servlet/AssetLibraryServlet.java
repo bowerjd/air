@@ -7,13 +7,21 @@ import org.apache.felix.scr.annotations.sling.SlingServlet;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.lonelystorm.air.asset.exceptions.CompilerException;
 import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.services.CompilerManager;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 
 @SlingServlet(resourceTypes = { "ls/AssetLibrary" }, methods = "GET")
 public class AssetLibraryServlet extends SlingSafeMethodsServlet {
+
+    /**
+     * Logger.
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(AssetLibraryServlet.class);
 
     /**
      * Default Serial Version.
@@ -43,11 +51,17 @@ public class AssetLibraryServlet extends SlingSafeMethodsServlet {
         if (library == null) {
             response.sendError(404, String.format("Unable to render library (%s)", resourcePath));
         } else {
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("text/css;charset=UTF-8");
+            try {
+                String code = compilerManager.compile(library);
 
-            String code = compilerManager.compile(library);
-            response.getWriter().append(code);
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("text/css;charset=UTF-8");
+
+                response.getWriter().append(code);
+            } catch (CompilerException e) {
+                response.sendError(500, String.format("Unable to render library (%s)", resourcePath));
+                LOGGER.error("Unable to render library", e);
+            }
         }
     }
 
