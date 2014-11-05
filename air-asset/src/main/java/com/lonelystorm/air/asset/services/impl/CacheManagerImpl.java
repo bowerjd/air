@@ -1,6 +1,7 @@
 package com.lonelystorm.air.asset.services.impl;
 
 import static com.lonelystorm.air.asset.util.PropertiesUtil.comparePropertyValue;
+import static com.lonelystorm.air.asset.util.PropertiesUtil.containsProperty;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +23,6 @@ import org.apache.sling.api.resource.ValueMap;
 import org.osgi.service.component.ComponentContext;
 
 import com.lonelystorm.air.asset.services.CacheManager;
-import com.lonelystorm.air.asset.util.PropertiesUtil;
 import com.lonelystorm.air.util.EscalatedResolver;
 
 @Component(immediate = true)
@@ -76,13 +76,13 @@ public class CacheManagerImpl implements CacheManager {
 
                             properties = new TreeMap<String, Object>();
                             properties.put("jcr:primaryType", "nt:resource");
-                            properties.put("jcr:data", IOUtils.toInputStream(compiled));
+                            properties.put("jcr:data", IOUtils.toInputStream(compiled, "UTF-8"));
                             properties.put("jcr:encoding", "utf8");
                             resolver.create(child, "jcr:content", properties);
                         }
 
                         resolver.commit();
-                    } catch (PersistenceException e) {
+                    } catch (IOException e) {
                         // TODO: Log me
                     }
 
@@ -105,12 +105,12 @@ public class CacheManagerImpl implements CacheManager {
                     Resource resource = resolver.getResource(normalizedPath);
                     ValueMap properties = ResourceUtil.getValueMap(resource);
 
-                    if (comparePropertyValue(properties, "jcr:primaryType", "nt:resource") && PropertiesUtil.containsProperty(properties, "jcr:data")) {
+                    if (comparePropertyValue(properties, "jcr:primaryType", "nt:resource") && containsProperty(properties, "jcr:data")) {
                         InputStream is = properties.get("jcr:data", InputStream.class);
                         String source = null;
 
                         try {
-                            source = IOUtils.toString(is);
+                            source = IOUtils.toString(is, "UTF-8");
                         } catch (IOException e) {
                             // TODO: Log me
                         } finally {
