@@ -39,7 +39,7 @@ module Sass
             end
 
             def _find(dir, name, options)
-                content = $service.include(dir + "/" + name)
+                content = $service.include(dir, name)
                 return unless content
 
                 options[:importer] = self

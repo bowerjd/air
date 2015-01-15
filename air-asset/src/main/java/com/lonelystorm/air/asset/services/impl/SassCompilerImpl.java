@@ -1,28 +1,25 @@
 package com.lonelystorm.air.asset.services.impl;
 
-import static com.lonelystorm.air.asset.util.PropertiesUtil.comparePropertyValue;
-import static com.lonelystorm.air.asset.util.PropertiesUtil.containsProperty;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.format;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.io.FilenameUtils.getName;
+import static org.apache.commons.io.FilenameUtils.getPathNoEndSeparator;
+import static org.apache.commons.lang.StringUtils.removeStart;
+import static org.apache.commons.lang.StringUtils.split;
 import static org.apache.commons.lang.StringUtils.trim;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
 import org.jruby.RubyException;
 import org.jruby.embed.InvokeFailedException;
 import org.jruby.embed.LocalContextScope;
@@ -34,15 +31,25 @@ import org.osgi.service.component.ComponentContext;
 
 import com.lonelystorm.air.asset.exceptions.CompilerException;
 import com.lonelystorm.air.asset.models.Asset;
+import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.services.Compiler;
-import com.lonelystorm.air.util.EscalatedResolver;
+import com.lonelystorm.air.asset.services.FileResolver;
+import com.lonelystorm.air.asset.services.LibraryResolver;
 
 @Component
 @Service
 public class SassCompilerImpl implements Compiler {
 
+    private static final String[] FILE_FORMATS = {
+        "/%s/_%s.scss/jcr:content",
+        "/%s/%s.scss/jcr:content"
+    };
+
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private FileResolver fileResolver;
+
+    @Reference
+    private LibraryResolver libraryResolver;
 
     private Bundle bundle;
 
@@ -80,8 +87,8 @@ public class SassCompilerImpl implements Compiler {
 
     @Override
     public boolean supports(Asset library, String file) {
-        String filename = FilenameUtils.getBaseName(file);
-        String extension = FilenameUtils.getExtension(file);
+        String filename = getBaseName(file);
+        String extension = getExtension(file);
 
         if (!filename.startsWith("_") && (extension.equals("scss") || extension.equals("sass"))) {
             return true;
@@ -90,44 +97,44 @@ public class SassCompilerImpl implements Compiler {
         return false;
     }
 
-    public String include(String file) {
-        String path = FilenameUtils.getPath(file);
-        String filename = FilenameUtils.getBaseName(file);
-        final String normalizedPath = FilenameUtils.normalize(String.format("/%s/_%s.scss/jcr:content", path, filename), true);
+    // TODO: Rework
+    public String include(String directory, String filename) {
+        String location = format("%s/%s", directory, removeStart(filename, "/"));
 
-        EscalatedResolver escalated = new EscalatedResolver(resourceResolverFactory, getClass());
-        String source = escalated.doSession(new EscalatedResolver.Session<String>() {
+        directory = getPathNoEndSeparator(location);
+        filename = getName(location);
 
-            @Override
-            public String run(ResourceResolver resolver) {
-                Resource resource = resolver.getResource(normalizedPath);
-                ValueMap properties = ResourceUtil.getValueMap(resource);
+        for (String format : FILE_FORMATS) {
+            location = format(format, directory, getBaseName(filename));
 
-                if (comparePropertyValue(properties, "jcr:primaryType", "nt:resource") && containsProperty(properties, "jcr:data")) {
-                    InputStream is = properties.get("jcr:data", InputStream.class);
-                    String source = null;
-
-                    try {
-                        source = IOUtils.toString(is);
-                    } catch (IOException e) {
-                        // TODO: Log me
-                    } finally {
-                        IOUtils.closeQuietly(is);
-                    }
-
-                    return source;
-                }
-
-                return null;
+            if (fileResolver.exists(location)) {
+                return fileResolver.load(location);
             }
+        }
 
-        });
+        // Else
+        StringBuilder files = new StringBuilder();
+        List<AssetLibrary> libraries = libraryResolver.findLibrariesByCategory(filename);
+        if (libraries != null) {
+            for (AssetLibrary library : libraries) {
+                Set<String> sources = library.getSources();
+                for (String source : sources) {
+                    if (supports(null, source)) {
+                        files.append(String.format("@import '%s';", source));
+                    }
+                }
+            }
+        }
 
-        return source;
+        if (files.length() == 0) {
+            return null;
+        } else {
+            return files.toString();
+        }
     }
 
     private CompilerException cause(String message, String backtrace) {
-        String[] lines = StringUtils.split(backtrace, "\n");
+        String[] lines = split(backtrace, "\n");
         List<StackTraceElement> elements = new ArrayList<>();
 
         Pattern pattern = Pattern.compile("(on|from) line ([0-9]+) of (.+)");
@@ -138,7 +145,7 @@ public class SassCompilerImpl implements Compiler {
 
             if (matcher.matches()) {
                 String file = matcher.group(3);
-                int lineNumber = Integer.parseInt(matcher.group(2));
+                int lineNumber = parseInt(matcher.group(2));
 
                 StackTraceElement element = new StackTraceElement("SassCompiler", "compile", file, lineNumber);
                 elements.add(element);
