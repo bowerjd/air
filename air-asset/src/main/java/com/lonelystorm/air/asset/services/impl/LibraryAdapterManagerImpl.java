@@ -10,21 +10,40 @@ import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
 import com.lonelystorm.air.asset.services.LibraryAdapterManager;
 
+/**
+ * The LibraryAdapterManagerImpl provides the implementation
+ * for the LibraryAdapterManager interface.
+ *
+ * The service requires the reference to both AdaptorFactories for
+ * AssetLibrary and AssetTheme to resolve the race condition.
+ */
 @Component
 @Service
 public class LibraryAdapterManagerImpl implements LibraryAdapterManager {
 
+    /**
+     * AssetLibrary Adaptor
+     */
     @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetLibrary)")
     private AdapterFactory libraryAdaptorFactory;
 
+    /**
+     * AssetTheme Adaptor
+     */
     @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetTheme)")
     private AdapterFactory themeAdaptorFactory;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AssetLibrary library(Resource resource) {
         return libraryAdaptorFactory.getAdapter(resource, AssetLibrary.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public AssetTheme theme(Resource resource) {
         return themeAdaptorFactory.getAdapter(resource, AssetTheme.class);
