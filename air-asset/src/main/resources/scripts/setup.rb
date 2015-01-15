@@ -51,10 +51,12 @@ module Sass
     end
 end
 
+$cacheStore = Sass::CacheStores::Memory.new
+
 def compile(content, filename, loadPaths)
     engine = Sass::Engine.new(content, {
         :style => :compressed,
-        :cache => false,
+        :cache_store => $cacheStore,
         :filename => filename,
         :load_paths => loadPaths,
         :syntax => :scss,
