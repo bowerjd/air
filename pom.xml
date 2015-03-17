@@ -7,7 +7,7 @@
     <!-- ====================================================================== -->
     <groupId>com.lonelystorm.air</groupId>
     <artifactId>air-parent</artifactId>
-    <version>0.1.8-SNAPSHOT</version>
+    <version>0.1.8</version>
     <packaging>pom</packaging>
 
     <name>LonelyStorm Air - Reactor</name>
@@ -39,7 +39,7 @@
         <connection>scm:git:git://github.com/LonelyStorm/air.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/LonelyStorm/air.git</developerConnection>
         <url>https://github.com/LonelyStorm/air</url>
-        <tag>HEAD</tag>
+        <tag>v0.1.8</tag>
     </scm>
 
     <issueManagement>
