@@ -4,6 +4,11 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2/repository
+
 env:
   global:
     - secure: "C487oZ9IG4zlJa2UskW1Qfppejj8j35+eTi3mHr/0oC9czM/9ceS6vOJoeOhehwDGgJ8AA/9USn+srYJAx+9qeWvomLi5zGt422Ob2lI1L/O7snzWJJw5FRPFEC0KX+YuAaC2VsThUxy7SZsffDEIfBB5AcGL95Pl+8sfSQVn7I="
