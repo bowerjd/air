@@ -19,6 +19,7 @@ public class Repository {
         .resource("/library")
             .p("categories", new String[] { "team" })
             .p("embed", new String[] { "pvp" })
+            .p("precompile", true)
             .p("loadPaths", new String[] { "/library/one", "/library/two" })
                 .resource("/library/theme1")
                     .p(JcrConstants.JCR_PRIMARYTYPE, LibraryConstants.ASSET_THEME_TYPE_NAME)

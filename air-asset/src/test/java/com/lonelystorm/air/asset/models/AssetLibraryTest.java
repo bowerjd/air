@@ -15,9 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.lonelystorm.air.asset.models.AssetLibrary;
-import com.lonelystorm.air.asset.models.AssetTheme;
-
 @RunWith(MockitoJUnitRunner.class)
 public class AssetLibraryTest {
 
@@ -60,6 +57,14 @@ public class AssetLibraryTest {
         AssetLibrary library = resource.adaptTo(AssetLibrary.class);
 
         assertArrayEquals(new String[] { "team" }, library.getCategories());
+    }
+
+    @Test
+    public void precompile() {
+        Resource resource = resolver.getResource("/library");
+        AssetLibrary library = resource.adaptTo(AssetLibrary.class);
+
+        assertTrue(library.getPrecompile());
     }
 
     @Test

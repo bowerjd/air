@@ -24,6 +24,11 @@ public abstract class Asset {
     @Default(values = {})
     private String[] embed;
 
+    @Inject
+    @Optional
+    @Default(booleanValues = false)
+    private boolean precompile;
+
     private String path;
 
     private Set<String> sources;
@@ -44,6 +49,15 @@ public abstract class Asset {
      */
     public String[] getEmbed() {
         return embed.clone();
+    }
+
+    /**
+     * Returns an boolean stating if a library should be precompiled.
+     *
+     * @return Precompile
+     */
+    public boolean getPrecompile() {
+        return precompile;
     }
 
     /**
