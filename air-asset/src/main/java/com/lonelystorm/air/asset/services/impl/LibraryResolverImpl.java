@@ -1,6 +1,7 @@
 package com.lonelystorm.air.asset.services.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -117,6 +118,11 @@ public class LibraryResolverImpl implements LibraryResolver {
     }
 
     @Override
+    public Collection<AssetLibrary> findAllLibraries() {
+        return libraries.values();
+    }
+
+    @Override
     public AssetLibrary findLibraryBySource(String source) {
         synchronized (this) {
             return sources.get(source);
@@ -142,6 +148,11 @@ public class LibraryResolverImpl implements LibraryResolver {
         synchronized (this) {
             return categories.get(category);
         }
+    }
+
+    @Override
+    public Collection<AssetTheme> findAllThemes() {
+        return themes.values();
     }
 
     @Override
