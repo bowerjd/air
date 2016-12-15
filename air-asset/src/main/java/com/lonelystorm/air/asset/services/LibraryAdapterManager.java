@@ -4,6 +4,7 @@ import org.apache.sling.api.resource.Resource;
 
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 
 /**
  * The LibraryAdapterManager provides an interface to convert an resource into an asset.
@@ -36,5 +37,15 @@ public interface LibraryAdapterManager {
      *     otherwise null is returned.
      */
     public AssetTheme theme(Resource resource);
+
+    /**
+     * Converts a resource into an AssetThemeConfiguration
+     * @param resource
+     *     The resource to adapt
+     * @return
+     *     The AssetThemeConfiguration if the resource contaiend the required parameters and passed validation,
+     *     otherwise null is returned.
+     */
+    public AssetThemeConfiguration themeConfiguration(Resource resource);
 
 }

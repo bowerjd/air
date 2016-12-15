@@ -9,5 +9,6 @@ public class LibraryConstants {
     public static final String ASSET_TYPE_NAME = "ls:AssetLibrary";
 
     public static final String ASSET_THEME_TYPE_NAME = "ls:AssetTheme";
-
+    
+    public static final String ASSET_THEME_CONFIG_NAME = "ls:AssetThemeConfiguration";
 }

@@ -8,6 +8,7 @@ import org.apache.sling.api.resource.Resource;
 
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.LibraryAdapterManager;
 
 /**
@@ -32,6 +33,14 @@ public class LibraryAdapterManagerImpl implements LibraryAdapterManager {
      */
     @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetTheme)")
     private AdapterFactory themeAdaptorFactory;
+    
+
+    /**
+     * AssetTheme Configuration Adaptor
+     */
+    @Reference(target = "(models.adapter.implementationClass=com.lonelystorm.air.asset.models.AssetThemeConfiguration)")
+    private AdapterFactory themeConfigAdaptorFactory;
+    
 
     /**
      * {@inheritDoc}
@@ -49,4 +58,8 @@ public class LibraryAdapterManagerImpl implements LibraryAdapterManager {
         return themeAdaptorFactory.getAdapter(resource, AssetTheme.class);
     }
 
+    @Override
+    public AssetThemeConfiguration themeConfiguration(Resource resource) {
+        return themeConfigAdaptorFactory.getAdapter(resource, AssetThemeConfiguration.class);
+    }
 }

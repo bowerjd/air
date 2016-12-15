@@ -49,6 +49,7 @@ public class LibraryNodeTypeImpl {
             registerNamespace(workspace.getNamespaceRegistry());
             registerLibraryTemplate(workspace.getNodeTypeManager());
             registerLibraryThemeTemplate(workspace.getNodeTypeManager());
+            registerLibraryThemeConfigTemplate(workspace.getNodeTypeManager());
             registerIndexes(session);
         } catch (RepositoryException e) {
                 LOGGER.error("Unable to setup the repository namespace, node types and indexes", e);
@@ -112,6 +113,24 @@ public class LibraryNodeTypeImpl {
 
         manager.registerNodeType(nt, true);
     }
+    
+    /**
+     * Register the library theme node template
+     *
+     * @param manager
+     * @throws RepositoryException
+     */
+    @SuppressWarnings("unchecked")
+    private void registerLibraryThemeConfigTemplate(NodeTypeManager manager) throws RepositoryException {
+        NodeTypeTemplate nt = manager.createNodeTypeTemplate();
+        nt.setName(LibraryConstants.ASSET_THEME_CONFIG_NAME);
+        nt.setAbstract(false);
+        nt.setQueryable(true);
+        nt.setDeclaredSuperTypeNames(new String[] { "nt:unstructured" });
+
+        manager.registerNodeType(nt, true);
+    }
+
 
     /**
      * Register the indexes for oak repositories.
