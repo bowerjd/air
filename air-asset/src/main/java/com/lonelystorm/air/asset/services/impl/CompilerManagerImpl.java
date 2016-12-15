@@ -1,6 +1,9 @@
 package com.lonelystorm.air.asset.services.impl;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,8 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -30,10 +35,12 @@ import com.lonelystorm.air.asset.exceptions.CompilerException;
 import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.CacheManager;
 import com.lonelystorm.air.asset.services.Compiler;
 import com.lonelystorm.air.asset.services.CompilerManager;
 import com.lonelystorm.air.asset.services.LibraryResolver;
+import com.lonelystorm.air.asset.services.ThemeConfigurationService;
 import com.lonelystorm.air.asset.util.CompilerSession;
 
 @Component
@@ -49,6 +56,15 @@ public class CompilerManagerImpl implements CompilerManager {
     )
     private final Map<String, Compiler> compilers = Collections.synchronizedMap(new TreeMap<String, Compiler>());
 
+    @Reference(
+            referenceInterface = ThemeConfigurationService.class,
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            bind = "bindThemeConfigService",
+            unbind = "unbindThemeConfigService"
+        )
+    private final Map<String, ThemeConfigurationService> themeConfigurators = Collections.synchronizedMap(new TreeMap<String, ThemeConfigurationService>());
+    
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -86,6 +102,14 @@ public class CompilerManagerImpl implements CompilerManager {
     protected void unbindCompiler(Compiler compiler) {
         String name = compiler.getClass().getName();
         compilers.remove(name);
+    }
+    
+    protected void bindThemeConfigService(ThemeConfigurationService service) {
+        themeConfigurators.put(service.getClass().getName(), service);
+    }
+    
+    protected void  unbindThemeConfigService(ThemeConfigurationService service) {
+        themeConfigurators.remove(service.getClass().getName());
     }
 
     /**
@@ -136,29 +160,38 @@ public class CompilerManagerImpl implements CompilerManager {
         } else if (asset instanceof AssetTheme) {
             AssetTheme folder = (AssetTheme) asset;
             for (final String embed : folder.getEmbed()) {
-                List<AssetTheme> themes = libraryResolver.findThemesByTheme(embed);
+                Collection<AssetTheme> themes = libraryResolver.findThemesByTheme(embed);
+                for (final AssetTheme theme : themes) {
+                    compile(theme, futures);
+                }
+            }
+        } else if (asset instanceof AssetThemeConfiguration) {
+            final AssetThemeConfiguration conf = (AssetThemeConfiguration)asset;
+            for (final String embed : conf.getEmbed()) {
+                final Collection<AssetTheme> themes = libraryResolver.findThemesByTheme(embed);
                 for (final AssetTheme theme : themes) {
                     compile(theme, futures);
                 }
             }
         }
-
-        for (final String file : asset.getSources()) {
+        
+        if (asset instanceof AssetThemeConfiguration) {
+            final AssetThemeConfiguration conf = (AssetThemeConfiguration)asset;
+            final String result = cacheManager.get(conf.getPath());
             ListenableFuture<String> future = null;
-            final String result = cacheManager.get(file);
-
+            
             synchronized (tasks) {
-                if (tasks.containsKey(file)) {
-                    future = tasks.get(file);
+                if (tasks.containsKey(conf.getPath())) {
+                    future = tasks.get(conf.getPath());
                 } else {
                     if (result == null) {
-                        future = compile(asset, file);
+                        future = compile(conf);
                     } else {
                         future = Futures.immediateFuture(result);
                     }
 
                     if (future != null) {
-                        tasks.put(file, future);
+                        tasks.put(conf.getPath(), future);
                     }
                 }
             }
@@ -166,9 +199,76 @@ public class CompilerManagerImpl implements CompilerManager {
             if (future != null) {
                 futures.add(future);
             }
+            
+        } else {
+            for (final String file : asset.getSources()) {
+                ListenableFuture<String> future = null;
+                final String result = cacheManager.get(file);
+
+                synchronized (tasks) {
+                    if (tasks.containsKey(file)) {
+                        future = tasks.get(file);
+                    } else {
+                        if (result == null) {
+                            future = compile(asset, file);
+                        } else {
+                            future = Futures.immediateFuture(result);
+                        }
+
+                        if (future != null) {
+                            tasks.put(file, future);
+                        }
+                    }
+                }
+
+                if (future != null) {
+                    futures.add(future);
+                }
+            }
         }
     }
 
+    private ListenableFuture<String> compile(AssetThemeConfiguration config) {
+        final CompilerSession session = new CompilerSession(resourceResolverFactory, getClass());
+        
+        String source = session.file(config.getThemeSource());
+        
+        if (source != null) {
+            for (Compiler compiler : compilers.values()) {
+                if (compiler.supports(config.getBaseTheme(), config.getThemeSource())) {
+                    boolean configured = false;
+                    // Augment the source
+                    for (ThemeConfigurationService configurator : themeConfigurators.values()) {
+                        if (configurator.supports(config)) {
+                            configured = true;
+                            final String originalSource = source;
+                            source = configurator.augmentTheme(config, source);
+                            if (LOG.isDebugEnabled()) {
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace(format("Augmenting %s with %s by %s:%n"+
+                                           ">>>>>>>>>>>>>>>>Orignal Source<<<<<<<<<<<<<<%n%s%n"+
+                                           "}}}}}}}}}}}}}}}}New Source{{{{{{{{{{{{{{{{{{%n%s%n===========================================", 
+                                           config.getBaseTheme().getPath(), config.getPath(), configurator.getClass().getName(), originalSource, source));
+                                } else {
+                                    LOG.debug("Augmenting {} with {} by {}", config.getBaseTheme().getPath(), config.getPath(), configurator.getClass().getName());
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    
+                    if (!configured) {
+                        LOG.warn("Failed to find a supported {} to augment {}", ThemeConfigurationService.class.getSimpleName(), config);
+                    }
+                    
+                    return pool.submit(new CompileTask(compiler, config.getBaseTheme(), config.getThemeSource(), source));
+                }
+            }
+        }
+
+        return null;
+    }
+    
     private ListenableFuture<String> compile(final Asset asset, final String file) {
         final CompilerSession session = new CompilerSession(resourceResolverFactory, getClass());
         final String source = session.file(file);
@@ -208,4 +308,5 @@ public class CompilerManagerImpl implements CompilerManager {
 
     }
 
+    private static final Logger LOG = LoggerFactory.getLogger(CompilerManagerImpl.class);
 }

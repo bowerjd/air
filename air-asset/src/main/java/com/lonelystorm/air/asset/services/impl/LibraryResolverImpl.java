@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -18,6 +20,7 @@ import org.osgi.service.component.ComponentContext;
 import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.LibraryAdapterManager;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 import com.lonelystorm.air.util.EscalatedResolver;
@@ -40,7 +43,10 @@ public class LibraryResolverImpl implements LibraryResolver {
 
     private volatile Map<String, AssetTheme> themes;
 
-    private volatile Map<String, List<AssetTheme>> themesCategories;
+    private volatile Map<String, AssetThemeConfiguration> themeConfigs;
+    
+    private volatile Map<String, Set<AssetTheme>> themesCategories;
+
 
     @Activate
     public void activate(ComponentContext context) {
@@ -49,6 +55,7 @@ public class LibraryResolverImpl implements LibraryResolver {
         categories = new TreeMap<>();
 
         themes = new TreeMap<>();
+        themeConfigs = new TreeMap<>();
         themesCategories = new TreeMap<>();
     }
 
@@ -78,6 +85,32 @@ public class LibraryResolverImpl implements LibraryResolver {
     }
 
     @Override
+    public AssetThemeConfiguration loadThemeConfiguration(final String path) {
+        EscalatedResolver escalated = new EscalatedResolver(resourceResolverFactory, getClass());
+        AssetThemeConfiguration themeConf = escalated.doSession(new EscalatedResolver.Session<AssetThemeConfiguration>() {
+
+            @Override
+            public AssetThemeConfiguration run(ResourceResolver resolver) {
+                Resource resource = resolver.getResource(path);
+                if (resource != null) {
+                    AssetThemeConfiguration themeConf = libraryAdapterManager.themeConfiguration(resource);
+                    return themeConf;
+                }
+
+                return null;
+            }
+
+        });
+
+        if (themeConf != null) {
+            addThemeConfiguration(themeConf);
+        }
+
+        return themeConf;
+    }
+
+    
+    @Override
     public void clear() {
         synchronized (this) {
             libraries.clear();
@@ -85,6 +118,7 @@ public class LibraryResolverImpl implements LibraryResolver {
             categories.clear();
 
             themes.clear();
+            themeConfigs.clear();
         }
     }
 
@@ -109,11 +143,18 @@ public class LibraryResolverImpl implements LibraryResolver {
 
                 for (String category : theme.getThemes()) {
                     if (!themesCategories.containsKey(category)) {
-                        themesCategories.put(category, new ArrayList<AssetTheme>());
+                        themesCategories.put(category, new HashSet<AssetTheme>());
                     }
                     themesCategories.get(category).add(theme);
                 }
             }
+        }
+    }
+
+    @Override
+    public void addThemeConfiguration(AssetThemeConfiguration themeConfig) {
+        synchronized (this) {
+            themeConfigs.put(themeConfig.getPath(), themeConfig);
         }
     }
 
@@ -161,9 +202,21 @@ public class LibraryResolverImpl implements LibraryResolver {
             return themes.get(path);
         }
     }
+    
+    @Override
+    public AssetThemeConfiguration findThemeConfigurationByPath(String path) {
+        synchronized (this) {
+            return themeConfigs.get(path);
+        }    
+    }
 
     @Override
-    public List<AssetTheme> findThemesByTheme(String theme) {
+    public Collection<AssetThemeConfiguration> findAllThemeConfigurations() {
+        return themeConfigs.values();
+    }
+
+    @Override
+    public Set<AssetTheme> findThemesByTheme(String theme) {
         synchronized (this) {
             return themesCategories.get(theme);
         }

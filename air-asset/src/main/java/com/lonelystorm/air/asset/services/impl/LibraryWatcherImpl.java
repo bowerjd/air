@@ -35,6 +35,7 @@ import com.lonelystorm.air.asset.exceptions.CompilerException;
 import com.lonelystorm.air.asset.models.Asset;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.CacheManager;
 import com.lonelystorm.air.asset.services.CompilerManager;
 import com.lonelystorm.air.asset.services.LibraryResolver;
@@ -61,10 +62,12 @@ public class LibraryWatcherImpl implements EventListener {
     @Reference
     private CacheManager cacheManager;
 
-    private Session session = null;
+    private Session observerSession = null;
 
     @Property(name = "paths", value = { "/libs", "/apps", "/etc" }, unbounded = PropertyUnbounded.ARRAY)
     private String[] paths;
+
+    private ObservationManager manager;
 
     @Activate
     public void activate(ComponentContext context) {
@@ -72,11 +75,11 @@ public class LibraryWatcherImpl implements EventListener {
         paths = PropertiesUtil.toStringArray(properties.get("paths"), new String[] {});
 
         try {
-            session = repository.loginAdministrative(null);
+            observerSession = repository.loginAdministrative(null);
 
-            ObservationManager manager = session.getWorkspace().getObservationManager();
+            this.manager = observerSession.getWorkspace().getObservationManager();
             manager.addEventListener(this, Event.NODE_ADDED | Event.NODE_MOVED | Event.NODE_REMOVED | Event.PROPERTY_ADDED | Event.PROPERTY_CHANGED | Event.PROPERTY_REMOVED, "/", true, null, null, true);
-            loadExistingLibraries();
+            loadExistingLibraries(observerSession);
             precompileExistingLibraries();
         } catch (RepositoryException e) {
             LOGGER.error("Error installing watcher for {} nodes.", LibraryConstants.ASSET_TYPE_NAME, e);
@@ -85,16 +88,16 @@ public class LibraryWatcherImpl implements EventListener {
 
     @Deactivate
     public void deactivate(ComponentContext context) {
-        if (session != null) {
+        if (observerSession != null) {
             try {
-                ObservationManager manager = session.getWorkspace().getObservationManager();
-                manager.removeEventListener(this);
+                if (manager != null) {
+                    manager.removeEventListener(this);
+                }
             } catch (RepositoryException e) {
                 LOGGER.error("Error removing watcher for {} nodes.", LibraryConstants.ASSET_TYPE_NAME, e);
             } finally {
-                if (session != null) {
-                    session.logout();
-                }
+                manager = null;
+                observerSession.logout();
             }
         }
     }
@@ -120,10 +123,11 @@ public class LibraryWatcherImpl implements EventListener {
 
     /**
      * Finds existing asset libraries.
+     * @param session
      *
      * @throws RepositoryException
      */
-    private void loadExistingLibraries() throws RepositoryException {
+    private void loadExistingLibraries(Session session) throws RepositoryException {
         String queryString = String.format("/jcr:root//element(*, %s)", LibraryConstants.ASSET_TYPE_NAME);
 
         Query query = session.getWorkspace().getQueryManager().createQuery(queryString, "xpath");
@@ -138,9 +142,40 @@ public class LibraryWatcherImpl implements EventListener {
                 libraryResolver.load(node.getPath());
             }
         }
+        loadExistingThemeConfigurations(session);
+    }
+
+    /**
+     * Finds existing asset libraries.
+     * @param session 
+     *
+     * @throws RepositoryException
+     */
+    private void loadExistingThemeConfigurations(Session session) throws RepositoryException {
+        String queryString = String.format("/jcr:root//element(*, %s)", LibraryConstants.ASSET_THEME_CONFIG_NAME);
+
+        Query query = session.getWorkspace().getQueryManager().createQuery(queryString, "xpath");
+        QueryResult result = query.execute();
+        int count = 0;
+
+        NodeIterator iterator = result.getNodes();
+        while (iterator.hasNext()) {
+            Node node = iterator.nextNode();
+            if (isValidPath(node.getPath())) {
+                AssetThemeConfiguration conf = libraryResolver.loadThemeConfiguration(node.getPath());
+                if (conf != null) {
+                    LOGGER.debug("Loaded {}", conf.getPath());
+                    count++;
+                } else {
+                    LOGGER.info("Failed to load ThemeConfig at {}", node.getPath());
+                }
+            }
+        }
+        LOGGER.info("Loaded {} Theme Configurations", count);
     }
 
     private void precompileExistingLibraries() {
+        LOGGER.info("Starting pre-compilation");
         Collection<AssetLibrary> libraries = libraryResolver.findAllLibraries();
         for (AssetLibrary library : libraries) {
             if (library.getPrecompile()) {
@@ -158,6 +193,21 @@ public class LibraryWatcherImpl implements EventListener {
                     compilerManager.compile(theme);
                 } catch (CompilerException e) {
                     LOGGER.error("Unable to precompile theme", e);
+                }
+            }
+        }
+        precompileExistingThemeConfigurations();
+        LOGGER.info("Finished pre-compilation");
+    }
+    
+    private void precompileExistingThemeConfigurations() {
+        Collection<AssetThemeConfiguration> configs = libraryResolver.findAllThemeConfigurations();
+        for (AssetThemeConfiguration config : configs) {
+            if (config.getPrecompile()) {
+                try {
+                    compilerManager.compile(config);
+                } catch (CompilerException e) {
+                    LOGGER.error("Unable to precompile theme configuration", e);
                 }
             }
         }
@@ -207,64 +257,98 @@ public class LibraryWatcherImpl implements EventListener {
         Set<String> all = new HashSet<>();
         all.addAll(removed);
         all.addAll(changed);
-        if (all.size() > 0) {
-            for (String path : all) {
-                Asset asset = getAssetFromPath(path);
-                if (asset != null) {
-                    try {
-                        loadExistingLibraries();
-                        precompileExistingLibraries();
-                    } catch (RepositoryException e) {
-                        LOGGER.error("Unable to reload asset libraries ({})", path, e);
+        if (all.size() > 0 || added.size() > 0) {
+            Session session = null;
+            try {
+                session = repository.loginAdministrative(null);
+                if (all.size() > 0) {
+                    for (String path : all) {
+                        Asset asset = getAssetFromPath(session, path);
+                        if (asset != null) {
+                            
+                            try {
+                                loadExistingLibraries(session);
+                                precompileExistingLibraries();
+                            } catch (RepositoryException e) {
+                                LOGGER.error("Unable to reload asset libraries ({})", path, e);
+                            }
+                            break;
+                        }
                     }
-                    break;
-                }
-            }
-        } else if (added.size() > 0) {
-            for (String path : added) {
-                try {
-                    session.refresh(false);
-                    Node node = session.getNode(path);
+                } else if (added.size() > 0) {
+                    for (String path : added) {
+                        try {
+                            session.refresh(false);
+                            Node node = session.getNode(path);
 
-                    while (node != null && node.getDepth() > 0 && !node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                        node = node.getParent();
-                    }
+                            while (node != null && node.getDepth() > 0 && !isLibraryOrThemeConfigNode(node)) {
+                                node = node.getParent();
+                            }
 
-                    if (node != null && node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                        libraryResolver.load(node.getPath());
+                            if (node != null) {
+                                if (isLibrary(node)) {
+                                    libraryResolver.load(node.getPath());
+                                } else if (isThemeConfig(node)) {
+                                    libraryResolver.loadThemeConfiguration(node.getPath());
+                                }
+                            }
+                        } catch (RepositoryException e) {
+                            LOGGER.error("Unable to find asset library ({})", path, e);
+                        }
                     }
-                } catch (RepositoryException e) {
-                    LOGGER.error("Unable to find asset library ({})", path, e);
+                    for (String path : added) {
+                        Asset asset = getAssetFromPath(session, path);
+                        if (asset != null) {
+                            cacheManager.clear();
+                            break;
+                        }
+                    }
                 }
-            }
-            for (String path : added) {
-                Asset asset = getAssetFromPath(path);
-                if (asset != null) {
-                    cacheManager.clear();
-                    break;
+            } catch (RepositoryException e) {
+                LOGGER.warn("Failed to process repository events", e);
+            } finally {
+                if (session != null) {
+                    session.logout();
                 }
             }
         }
     }
 
-    private Asset getAssetFromPath(String path) {
+    private Asset getAssetFromPath(Session session, String path) {
         Asset asset = null;
 
         try {
             Node node = session.getNode(path);
 
-            while (node != null && node.getDepth() > 0 && !node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
+            while (node != null && node.getDepth() > 0 && !isLibraryOrThemeConfigNode(node)) {
                 node = node.getParent();
             }
 
-            if (node != null && node.isNodeType(LibraryConstants.ASSET_TYPE_NAME)) {
-                asset = libraryResolver.findLibraryByPath(node.getPath());
+            if (node != null) {
+                if (isLibrary(node)) {
+                    asset = libraryResolver.findLibraryByPath(node.getPath());
+                }
+                if (isThemeConfig(node)) {
+                    asset = libraryResolver.findThemeConfigurationByPath(node.getPath());
+                }
             }
         } catch (RepositoryException e) {
             LOGGER.error("Unable to find asset library ({})", path, e);
         }
 
         return asset;
+    }
+
+    private boolean isLibraryOrThemeConfigNode(Node node) throws RepositoryException {
+        return node != null && (isLibrary(node) || isThemeConfig(node));
+    }
+
+    private boolean isThemeConfig(Node node) throws RepositoryException {
+        return node.isNodeType(LibraryConstants.ASSET_THEME_CONFIG_NAME);
+    }
+
+    private boolean isLibrary(Node node) throws RepositoryException {
+        return node.isNodeType(LibraryConstants.ASSET_TYPE_NAME);
     }
 
 }
