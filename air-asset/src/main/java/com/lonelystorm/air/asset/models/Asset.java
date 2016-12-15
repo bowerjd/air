@@ -1,5 +1,7 @@
 package com.lonelystorm.air.asset.models;
 
+import static java.lang.String.format;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -124,4 +126,8 @@ public abstract class Asset {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return format("%s (%s)", getClass().getSimpleName(), path);
+    }
 }
