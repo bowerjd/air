@@ -73,6 +73,7 @@ public class SassCompilerImpl implements Compiler {
     @Override
     public String compile(Asset library, String file, String source) throws CompilerException {
         try {
+            // See http://www.sass-lang.com/documentation/file.SASS_REFERENCE.html
             return (String) container.callMethod(receiver, "compile", source, file, library.getLoadPaths());
         } catch (InvokeFailedException e) {
             RaiseException re = (RaiseException) e.getCause();

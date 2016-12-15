@@ -34,7 +34,8 @@ public abstract class Asset {
     private Set<String> sources;
 
     /**
-     * Returns an array containing the load paths for the compiler.
+     * Returns an array containing the load paths for the compiler. This is an array of repository paths or importers which should be searched for Sass templates 
+     * imported with the "@import" directive.
      *
      * @return The load paths
      */
@@ -43,7 +44,7 @@ public abstract class Asset {
     }
 
     /**
-     * Returns an array containing the categories of assets to embed during compilation.
+     * Returns an array containing the categories of assets to embed during compilation.format
      *
      * @return The embed dependencies
      */
@@ -81,7 +82,7 @@ public abstract class Asset {
     /**
      * Returns the sources of the asset.
      *
-     * @return The sources
+     * @return The sources as paths to files stored in the repository
      */
     public Set<String> getSources() {
         return Collections.unmodifiableSet(sources);
