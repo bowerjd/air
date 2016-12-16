@@ -113,7 +113,7 @@ public class LibraryNodeTypeImpl {
 
         manager.registerNodeType(nt, true);
     }
-    
+
     /**
      * Register the library theme node template
      *
@@ -127,6 +127,18 @@ public class LibraryNodeTypeImpl {
         nt.setAbstract(false);
         nt.setQueryable(true);
         nt.setDeclaredSuperTypeNames(new String[] { "nt:unstructured" });
+
+        PropertyDefinitionTemplate property = manager.createPropertyDefinitionTemplate();
+        property.setMandatory(true);
+        property.setName("baseTheme");
+        property.setMultiple(false);
+        nt.getPropertyDefinitionTemplates().add(property);
+
+        property = manager.createPropertyDefinitionTemplate();
+        property.setMandatory(true);
+        property.setName("uniqueName");
+        property.setMultiple(false);
+        nt.getPropertyDefinitionTemplates().add(property);
 
         manager.registerNodeType(nt, true);
     }
@@ -142,7 +154,9 @@ public class LibraryNodeTypeImpl {
         Node node = session.getNode("/oak:index/nodetype");
         if (node != null) {
             registerIndex(session, node, "declaringNodeTypes", LibraryConstants.ASSET_TYPE_NAME);
+            registerIndex(session, node, "declaringNodeTypes", LibraryConstants.ASSET_THEME_CONFIG_NAME);
         }
+        registerUniquePropertyIndex(session);
     }
 
     /**
@@ -173,4 +187,20 @@ public class LibraryNodeTypeImpl {
         }
     }
 
+    private void registerUniquePropertyIndex(Session session) throws RepositoryException {
+        Node oakIndex = session.getNode("/oak:index");
+        if (oakIndex == null) {
+            return;
+        }
+        if (oakIndex.hasNode("lsAssetThemeConfigurationIndex")) {
+            return;
+        }
+        Node index = oakIndex.addNode("lsAssetThemeConfigurationIndex", "oak:QueryIndexDefinition");
+        index.setProperty("type", "property");
+        index.setProperty("propertyNames", "uniqueName");
+        index.setProperty("declaringNodeTypes", LibraryConstants.ASSET_THEME_CONFIG_NAME);
+        index.setProperty("unique", true);
+        index.setProperty("reindex", true);
+        session.save();
+    }
 }

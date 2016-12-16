@@ -79,4 +79,30 @@ public class IncludeAssetLibraryTest extends AemContextTest {
         assertEquals(sw.toString(), include);
     }
 
+    @Test
+    public void themesConfigTakesPrecedanceOverPureThemes() throws Exception {
+        bindings.put("categories", "categories");
+        bindings.put("themes", "blue");
+        bindings.put("themeConfigPath", "/etc/themes/foo-config/jcr:content/config");
+
+        List<AssetLibrary> libraries = new ArrayList<>();
+        libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
+        when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);
+        Set<AssetTheme> themes = new HashSet<>(Arrays.asList(resolver.getResource("/library/theme1").adaptTo(AssetTheme.class)));
+        when(libraryResolver.findThemesByTheme("blue")).thenReturn(themes);
+
+        AssetThemeConfiguration config = resolver.getResource("/etc/themes/foo-config/jcr:content/config").adaptTo(AssetThemeConfiguration.class);
+
+        //MockResource.setAdapterManager(adapterMgr);;
+        when(libraryResolver.findThemeConfigurationByPath("/etc/themes/foo-config/jcr:content/config")).thenReturn(config);
+
+        includeAssetLibrary.init(bindings);
+        String include = includeAssetLibrary.include();
+
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library.css\">");
+        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library/theme1.stylish-blue.css\">");
+        assertEquals(sw.toString(), include);
+    }
 }

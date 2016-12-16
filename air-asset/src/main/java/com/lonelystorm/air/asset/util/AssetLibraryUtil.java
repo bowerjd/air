@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 
 public class AssetLibraryUtil {
@@ -45,6 +46,13 @@ public class AssetLibraryUtil {
         }
 
         return results;
+    }
+ 
+    public static AssetThemeConfiguration findThemeConfigurationByPath(LibraryResolver resolver, String configPath) {
+        if (configPath == null) {
+            return null;
+        }
+        return resolver.findThemeConfigurationByPath(configPath);
     }
 
     public static List<String> split(String text) {

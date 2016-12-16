@@ -64,7 +64,7 @@ public class CompilerManagerImpl implements CompilerManager {
             unbind = "unbindThemeConfigService"
         )
     private final Map<String, ThemeConfigurationService> themeConfigurators = Collections.synchronizedMap(new TreeMap<String, ThemeConfigurationService>());
-    
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -103,11 +103,11 @@ public class CompilerManagerImpl implements CompilerManager {
         String name = compiler.getClass().getName();
         compilers.remove(name);
     }
-    
+
     protected void bindThemeConfigService(ThemeConfigurationService service) {
         themeConfigurators.put(service.getClass().getName(), service);
     }
-    
+
     protected void  unbindThemeConfigService(ThemeConfigurationService service) {
         themeConfigurators.remove(service.getClass().getName());
     }
@@ -174,15 +174,15 @@ public class CompilerManagerImpl implements CompilerManager {
                 }
             }
         }
-        
+
         if (asset instanceof AssetThemeConfiguration) {
             final AssetThemeConfiguration conf = (AssetThemeConfiguration)asset;
-            final String result = cacheManager.get(conf.getPath());
+            final String result = cacheManager.get(conf.getRenderLocationPath());
             ListenableFuture<String> future = null;
-            
+
             synchronized (tasks) {
-                if (tasks.containsKey(conf.getPath())) {
-                    future = tasks.get(conf.getPath());
+                if (tasks.containsKey(conf.getRenderLocationPath())) {
+                    future = tasks.get(conf.getRenderLocationPath());
                 } else {
                     if (result == null) {
                         future = compile(conf);
@@ -191,7 +191,7 @@ public class CompilerManagerImpl implements CompilerManager {
                     }
 
                     if (future != null) {
-                        tasks.put(conf.getPath(), future);
+                        tasks.put(conf.getRenderLocationPath(), future);
                     }
                 }
             }
@@ -199,7 +199,7 @@ public class CompilerManagerImpl implements CompilerManager {
             if (future != null) {
                 futures.add(future);
             }
-            
+
         } else {
             for (final String file : asset.getSources()) {
                 ListenableFuture<String> future = null;
@@ -230,9 +230,9 @@ public class CompilerManagerImpl implements CompilerManager {
 
     private ListenableFuture<String> compile(AssetThemeConfiguration config) {
         final CompilerSession session = new CompilerSession(resourceResolverFactory, getClass());
-        
+
         String source = session.file(config.getThemeSource());
-        
+
         if (source != null) {
             for (Compiler compiler : compilers.values()) {
                 if (compiler.supports(config.getBaseTheme(), config.getThemeSource())) {
@@ -247,7 +247,7 @@ public class CompilerManagerImpl implements CompilerManager {
                                 if (LOG.isTraceEnabled()) {
                                     LOG.trace(format("Augmenting %s with %s by %s:%n"+
                                            ">>>>>>>>>>>>>>>>Orignal Source<<<<<<<<<<<<<<%n%s%n"+
-                                           "}}}}}}}}}}}}}}}}New Source{{{{{{{{{{{{{{{{{{%n%s%n===========================================", 
+                                           "}}}}}}}}}}}}}}}}New Source{{{{{{{{{{{{{{{{{{%n%s%n===========================================",
                                            config.getBaseTheme().getPath(), config.getPath(), configurator.getClass().getName(), originalSource, source));
                                 } else {
                                     LOG.debug("Augmenting {} with {} by {}", config.getBaseTheme().getPath(), config.getPath(), configurator.getClass().getName());
@@ -256,19 +256,19 @@ public class CompilerManagerImpl implements CompilerManager {
                             break;
                         }
                     }
-                    
+
                     if (!configured) {
                         LOG.warn("Failed to find a supported {} to augment {}", ThemeConfigurationService.class.getSimpleName(), config);
                     }
-                    
-                    return pool.submit(new CompileTask(compiler, config.getBaseTheme(), config.getThemeSource(), source));
+
+                    return pool.submit(new CompileTask(compiler, config.getBaseTheme(), config.getRenderLocationPath(), source));
                 }
             }
         }
 
         return null;
     }
-    
+
     private ListenableFuture<String> compile(final Asset asset, final String file) {
         final CompilerSession session = new CompilerSession(resourceResolverFactory, getClass());
         final String source = session.file(file);

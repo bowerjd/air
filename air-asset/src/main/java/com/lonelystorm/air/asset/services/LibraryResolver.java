@@ -20,7 +20,7 @@ public interface LibraryResolver {
     void add(AssetLibrary library);
 
     void addThemeConfiguration(AssetThemeConfiguration themeConfig);
-    
+
     Collection<AssetLibrary> findAllLibraries();
 
     AssetLibrary findLibraryBySource(String source);
@@ -38,4 +38,6 @@ public interface LibraryResolver {
     Collection<AssetThemeConfiguration> findAllThemeConfigurations();
 
     AssetThemeConfiguration findThemeConfigurationByPath(String path);
+
+    AssetThemeConfiguration findThemeConfigurationByUniqueName(String selector, AssetTheme theme);
 }

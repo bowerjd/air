@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.models.annotations.Model;
@@ -19,10 +20,14 @@ public class AssetThemeConfiguration extends Asset {
 
     @Self
     private Resource resource;
-    
+
     @Inject
+    @Named("baseTheme")
     private String baseThemeRef;
-    
+
+    @Inject
+    private String uniqueName;
+
     @Inject
     private LibraryResolver libResolver;
 
@@ -55,28 +60,40 @@ public class AssetThemeConfiguration extends Asset {
             throw new IllegalArgumentException(format("Multiple theme sources found on theme (%s) referenced by Theme Configuration at (%s). Use @import rather than multiple sources: %s", baseThemeRef, resource.getPath(), sources));
         }
     }
-    
+
     @Override
     public String[] getEmbed() {
         return baseTheme.getEmbed();
     }
-    
+
     @Override
     public String[] getLoadPaths() {
         return baseTheme.getLoadPaths();
     }
-    
-    /** Guranteed to only return one path **/
+
+    /** Guaranteed to only return one path **/
     @Override
     public Set<String> getSources() {
         return baseTheme.getSources();
     }
-    
+
     public String getThemeSource() {
         return getSources().iterator().next();
     }
-    
+
     public String getThemeConfigType() {
         return themeConfigType;
+    }
+
+    public String getBaseThemeName() {
+        return baseThemeRef;
+    }
+
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    public String getRenderLocationPath() {
+        return format("%s.%s", getBaseTheme().getPath(), getUniqueName());
     }
 }

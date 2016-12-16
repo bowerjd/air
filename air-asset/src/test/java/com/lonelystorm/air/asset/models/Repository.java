@@ -39,6 +39,12 @@ public class Repository {
             .p("categories", new String[] { "team" })
             .p("embed", new String[] { "pvp" })
             .p("loadPaths", new String[] { "/library/one", "/library/two" })
+        .resource("/etc").resource("/etc/themes").resource("foo-config").resource("jcr:content")
+        .resource("/etc/themes/foo-config/jcr:content/config")
+            .p(JcrConstants.JCR_PRIMARYTYPE, LibraryConstants.ASSET_THEME_CONFIG_NAME)
+            .p("baseTheme", "blue")
+            .p("uniqueName", "stylish-blue")
+            .p("themeConfigType", "something")
         .commit();
 
         return resolver;

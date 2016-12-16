@@ -1,5 +1,7 @@
 package com.lonelystorm.air.asset.services.impl;
 
+import static java.lang.String.format;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,8 +45,10 @@ public class LibraryResolverImpl implements LibraryResolver {
 
     private volatile Map<String, AssetTheme> themes;
 
+    private volatile Map<String, AssetThemeConfiguration> themeConfigsByPath;
+
     private volatile Map<String, AssetThemeConfiguration> themeConfigs;
-    
+
     private volatile Map<String, Set<AssetTheme>> themesCategories;
 
 
@@ -55,6 +59,7 @@ public class LibraryResolverImpl implements LibraryResolver {
         categories = new TreeMap<>();
 
         themes = new TreeMap<>();
+        themeConfigsByPath = new TreeMap<>();
         themeConfigs = new TreeMap<>();
         themesCategories = new TreeMap<>();
     }
@@ -109,7 +114,7 @@ public class LibraryResolverImpl implements LibraryResolver {
         return themeConf;
     }
 
-    
+
     @Override
     public void clear() {
         synchronized (this) {
@@ -118,6 +123,7 @@ public class LibraryResolverImpl implements LibraryResolver {
             categories.clear();
 
             themes.clear();
+            themeConfigsByPath.clear();
             themeConfigs.clear();
         }
     }
@@ -154,7 +160,8 @@ public class LibraryResolverImpl implements LibraryResolver {
     @Override
     public void addThemeConfiguration(AssetThemeConfiguration themeConfig) {
         synchronized (this) {
-            themeConfigs.put(themeConfig.getPath(), themeConfig);
+            themeConfigsByPath.put(themeConfig.getPath(), themeConfig);
+            themeConfigs.put(themeConfig.getRenderLocationPath(), themeConfig);
         }
     }
 
@@ -202,17 +209,24 @@ public class LibraryResolverImpl implements LibraryResolver {
             return themes.get(path);
         }
     }
-    
+
     @Override
     public AssetThemeConfiguration findThemeConfigurationByPath(String path) {
         synchronized (this) {
-            return themeConfigs.get(path);
-        }    
+            return themeConfigsByPath.get(path);
+        }
+    }
+
+    @Override
+    public AssetThemeConfiguration findThemeConfigurationByUniqueName(String selector, AssetTheme theme) {
+        synchronized (this) {
+            return themeConfigs.get(format("%s.%s", theme.getPath(), selector));
+        }
     }
 
     @Override
     public Collection<AssetThemeConfiguration> findAllThemeConfigurations() {
-        return themeConfigs.values();
+        return themeConfigsByPath.values();
     }
 
     @Override
