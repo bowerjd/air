@@ -1,58 +1,57 @@
 package com.lonelystorm.air.asset.sightly;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.lonelystorm.air.AemContextTest;
 import com.lonelystorm.air.asset.models.AssetLibrary;
+import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.models.Repository;
 import com.lonelystorm.air.asset.services.LibraryResolver;
-import com.lonelystorm.air.asset.sightly.IncludeAssetLibrary;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IncludeAssetLibraryTest {
-
-    @Mock
-    private SlingScriptHelper slingScriptHelper;
+public class IncludeAssetLibraryTest extends AemContextTest {
 
     @Mock
     private LibraryResolver libraryResolver;
 
-    private IncludeAssetLibrary includeAssetLibrary;
+    private IncludeAssetLibrary includeAssetLibrary = new IncludeAssetLibrary();
 
+    @Override
     @Before
-    public void setUp() {
-        includeAssetLibrary = spy(new IncludeAssetLibrary());
+    public void setUp() throws Exception {
+        super.setUp();
+        Repository.create(resolver);
 
-        doReturn(slingScriptHelper).when(includeAssetLibrary).getSlingScriptHelper();
-        when(slingScriptHelper.getService(LibraryResolver.class)).thenReturn(libraryResolver);
+        // OSGi Services
+        context.registerService(LibraryResolver.class, libraryResolver);
     }
 
     @Test
     public void categories() throws Exception {
-        doReturn("categories").when(includeAssetLibrary).get("categories", String.class);
-        doReturn(null).when(includeAssetLibrary).get("themes", String.class);
+        bindings.put("categories", "categories");
 
-        ResourceResolver resolver = Repository.create();
+
         List<AssetLibrary> libraries = new ArrayList<>();
         libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
         when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);
 
-        includeAssetLibrary.activate();
+        includeAssetLibrary.init(bindings);
         String include = includeAssetLibrary.include();
 
         StringWriter sw = new StringWriter();
@@ -63,15 +62,14 @@ public class IncludeAssetLibraryTest {
 
     @Test
     public void themes() throws Exception {
-        doReturn("categories").when(includeAssetLibrary).get("categories", String.class);
-        doReturn("blue").when(includeAssetLibrary).get("themes", String.class);
+        bindings.put("categories", "categories");
+        bindings.put("themes", "blue");
 
-        ResourceResolver resolver = Repository.create();
         List<AssetLibrary> libraries = new ArrayList<>();
         libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
         when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);
 
-        includeAssetLibrary.activate();
+        includeAssetLibrary.init(bindings);
         String include = includeAssetLibrary.include();
 
         StringWriter sw = new StringWriter();

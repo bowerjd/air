@@ -1,6 +1,5 @@
 package com.lonelystorm.air.asset.tags;
 
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,35 +10,19 @@ import java.util.List;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
 
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.scripting.SlingBindings;
-import org.apache.sling.api.scripting.SlingScriptHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.lonelystorm.air.AemContextTest;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.Repository;
 import com.lonelystorm.air.asset.services.LibraryResolver;
-import com.lonelystorm.air.asset.tags.IncludeAssetLibrary;
 
 @RunWith(MockitoJUnitRunner.class)
-public class IncludeAssetLibraryTest {
-
-    @Mock
-    private PageContext pageContext;
-
-    @Mock
-    private SlingHttpServletRequest slingHttpServletRequest;
-
-    @Mock
-    private SlingBindings slingBindings;
-
-    @Mock
-    private SlingScriptHelper slingScriptHelper;
+public class IncludeAssetLibraryTest extends AemContextTest {
 
     @Mock
     private JspWriter jspWriter;
@@ -47,22 +30,26 @@ public class IncludeAssetLibraryTest {
     @Mock
     private LibraryResolver libraryResolver;
 
-    private IncludeAssetLibrary includeAssetLibrary;
+    @Mock
+    private PageContext pageContext;
 
+    private IncludeAssetLibrary includeAssetLibrary = new IncludeAssetLibrary();
+
+    @Override
     @Before
-    public void setUp() {
-        includeAssetLibrary = spy(new IncludeAssetLibrary());
+    public void setUp() throws Exception {
+        super.setUp();
+        Repository.create(resolver);
 
-        when(pageContext.getRequest()).thenReturn(slingHttpServletRequest);
-        when(slingHttpServletRequest.getAttribute(SlingBindings.class.getName())).thenReturn(slingBindings);
-        when(slingBindings.getSling()).thenReturn(slingScriptHelper);
-        when(slingScriptHelper.getService(LibraryResolver.class)).thenReturn(libraryResolver);
+        // OSGi Services
+        context.registerService(LibraryResolver.class, libraryResolver);
+
+        when(pageContext.getRequest()).thenReturn(context.request());
         when(pageContext.getOut()).thenReturn(jspWriter);
     }
 
     @Test
     public void categories() throws Exception {
-        ResourceResolver resolver = Repository.create();
         List<AssetLibrary> libraries = new ArrayList<>();
         libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
         when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);
@@ -76,7 +63,6 @@ public class IncludeAssetLibraryTest {
 
     @Test
     public void themes() throws Exception {
-        ResourceResolver resolver = Repository.create();
         List<AssetLibrary> libraries = new ArrayList<>();
         libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
         when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);

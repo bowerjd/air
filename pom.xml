@@ -451,10 +451,11 @@
                 <version>1.9.5</version>
                 <scope>test</scope>
             </dependency>
+            <!-- NOTE for AEM 6.2+ use version 2.x of aem-mock. For AEM 6.0 to 6.1 use 1.x -->
             <dependency>
-                <groupId>org.apache.sling</groupId>
-                <artifactId>org.apache.sling.testing.resourceresolver-mock</artifactId>
-                <version>0.2.0</version>
+                <groupId>io.wcm</groupId>
+                <artifactId>io.wcm.testing.aem-mock</artifactId>
+                <version>1.8.0</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

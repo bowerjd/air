@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.lonelystorm.air.AemContextTest;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
 import com.lonelystorm.air.asset.models.Repository;
@@ -23,17 +23,23 @@ import com.lonelystorm.air.asset.services.LibraryResolver;
 import com.lonelystorm.air.asset.util.AssetLibraryUtil;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AssetLibraryUtilTest {
+public class AssetLibraryUtilTest extends AemContextTest {
 
     @Mock
     private LibraryResolver libraryResolver;
 
-    @Mock
-    private Resource resource;
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        Repository.create(resolver);
+
+        // OSGi Services
+        context.registerService(LibraryResolver.class, libraryResolver);
+    }
 
     @Test
     public void categories() throws Exception {
-        ResourceResolver resolver = Repository.create();
 
         AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
         List<AssetLibrary> libraries = new ArrayList<>();
@@ -64,8 +70,6 @@ public class AssetLibraryUtilTest {
 
     @Test
     public void themes() throws Exception {
-        ResourceResolver resolver = Repository.create();
-
         AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
         Set<AssetLibrary> libraries = new HashSet<>();
         libraries.add(library);
@@ -80,8 +84,6 @@ public class AssetLibraryUtilTest {
 
     @Test
     public void themesNoneExistant() throws Exception {
-        ResourceResolver resolver = Repository.create();
-
         AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
         Set<AssetLibrary> libraries = new HashSet<>();
         libraries.add(library);

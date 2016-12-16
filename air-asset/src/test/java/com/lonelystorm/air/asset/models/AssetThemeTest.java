@@ -9,22 +9,21 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.lonelystorm.air.asset.models.AssetTheme;
+import com.lonelystorm.air.AemContextTest;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AssetThemeTest {
+public class AssetThemeTest extends AemContextTest {
 
-    private ResourceResolver resolver;
-
+    @Override
     @Before
     public void setUp() throws Exception {
-        resolver = Repository.create();
+        super.setUp();
+        Repository.create(resolver);
     }
 
     @Test

@@ -2,18 +2,14 @@ package com.lonelystorm.air.asset.models;
 
 import org.apache.jackrabbit.JcrConstants;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.models.impl.MockAdapter;
 import org.apache.sling.testing.resourceresolver.MockHelper;
-import org.apache.sling.testing.resourceresolver.MockResourceResolverFactory;
 
 import com.lonelystorm.air.asset.util.LibraryConstants;
 
 public class Repository {
 
-    public static ResourceResolver create() throws Exception {
-        ResourceResolverFactory factory = new MockResourceResolverFactory();
-        ResourceResolver resolver = factory.getResourceResolver(null);
+    /** Setup the repository with some sample content */
+    public static ResourceResolver create(ResourceResolver resolver) throws Exception {
 
         MockHelper.create(resolver)
         .resource("/library")
@@ -44,8 +40,6 @@ public class Repository {
             .p("embed", new String[] { "pvp" })
             .p("loadPaths", new String[] { "/library/one", "/library/two" })
         .commit();
-
-        MockAdapter.setUp();
 
         return resolver;
     }

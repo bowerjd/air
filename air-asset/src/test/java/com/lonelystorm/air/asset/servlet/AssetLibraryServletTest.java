@@ -12,13 +12,14 @@ import java.io.PrintWriter;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.resource.ResourceResolver;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.lonelystorm.air.AemContextTest;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.Repository;
 import com.lonelystorm.air.asset.services.CompilerManager;
@@ -26,7 +27,7 @@ import com.lonelystorm.air.asset.services.LibraryResolver;
 import com.lonelystorm.air.asset.servlet.AssetLibraryServlet;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AssetLibraryServletTest {
+public class AssetLibraryServletTest extends AemContextTest {
 
     @Mock
     private SlingHttpServletRequest request;
@@ -49,9 +50,18 @@ public class AssetLibraryServletTest {
     @InjectMocks
     private AssetLibraryServlet assetLibraryServlet;
 
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        Repository.create(resolver);
+
+        // OSGi Services
+        context.registerService(LibraryResolver.class, libraryResolver);
+    }
+
     @Test
     public void doGet() throws Exception {
-        ResourceResolver resolver = Repository.create();
         AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
 
         when(request.getRequestPathInfo()).thenReturn(requestPathInfo);
@@ -69,7 +79,6 @@ public class AssetLibraryServletTest {
 
     @Test(expected = IOException.class)
     public void doGetIOException() throws Exception {
-        ResourceResolver resolver = Repository.create();
         AssetLibrary library = resolver.getResource("/library").adaptTo(AssetLibrary.class);
 
         when(request.getRequestPathInfo()).thenReturn(requestPathInfo);
