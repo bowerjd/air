@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Calendar;
 import java.util.Set;
 
 import com.adobe.cq.sightly.WCMUse;
@@ -48,7 +49,7 @@ public class IncludeAssetLibrary extends WCMUse {
         } else {
             for (AssetTheme themeLib : subLibraries) {
                 if (themeLib.equals(themeConfig.getBaseTheme())) {
-                    writer.println(AssetLibraryUtil.include(format("%s.%s", themeLib.getPath(), themeConfig.getUniqueName()), "css"));
+                    writer.println(AssetLibraryUtil.include(format("%s.%s%s", themeLib.getPath(), themeConfig.getUniqueName(), cacheBusterSelector(themeConfig.getLastModified())), "css"));
                 } else {
                     writer.println(AssetLibraryUtil.include(themeLib.getPath(), "css"));
                 }
@@ -56,6 +57,13 @@ public class IncludeAssetLibrary extends WCMUse {
         }
 
         return sw.toString();
+    }
+
+    private String cacheBusterSelector(Calendar calendar) {
+        if (calendar == null) {
+            return "";
+        }
+        return format(".v-%d-v", calendar.getTime().getTime());
     }
 
 }

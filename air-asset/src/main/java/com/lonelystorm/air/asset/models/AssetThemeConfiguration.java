@@ -2,6 +2,7 @@ package com.lonelystorm.air.asset.models;
 
 import static java.lang.String.format;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Set;
 
@@ -36,6 +37,8 @@ public class AssetThemeConfiguration extends Asset {
 
     private AssetTheme baseTheme;
 
+    private Calendar lastModified;
+
     public AssetTheme getBaseTheme() {
         return baseTheme;
     }
@@ -59,6 +62,15 @@ public class AssetThemeConfiguration extends Asset {
         if (sources.size() > 1) {
             throw new IllegalArgumentException(format("Multiple theme sources found on theme (%s) referenced by Theme Configuration at (%s). Use @import rather than multiple sources: %s", baseThemeRef, resource.getPath(), sources));
         }
+
+        int depth = 0;
+        for (Resource node = resource; node != null && depth < 3; node = resource.getParent(), depth+= 1) {
+            if (node.getValueMap().get("cq:lastModified", Calendar.class) != null) {
+                lastModified = node.getValueMap().get("cq:lastModified", Calendar.class);
+                break;
+            }
+        }
+
     }
 
     @Override
@@ -95,5 +107,9 @@ public class AssetThemeConfiguration extends Asset {
 
     public String getRenderLocationPath() {
         return format("%s.%s", getBaseTheme().getPath(), getUniqueName());
+    }
+
+    public Calendar getLastModified() {
+        return lastModified;
     }
 }

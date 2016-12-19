@@ -102,7 +102,7 @@ public class IncludeAssetLibraryTest extends AemContextTest {
         StringWriter sw = new StringWriter();
         PrintWriter writer = new PrintWriter(sw);
         writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library.css\">");
-        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library/theme1.stylish-blue.css\">");
+        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library/theme1.stylish-blue.v-61443972610000-v.css\">");
         assertEquals(sw.toString(), include);
     }
 }
