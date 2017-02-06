@@ -42,7 +42,7 @@ public class Repository {
             .p("embed", new String[] { "pvp" })
             .p("loadPaths", new String[] { "/library/one", "/library/two" })
         .resource("/etc").resource("/etc/themes").resource("foo-config").resource("jcr:content")
-            .p("cq:lastModified", new Date(2016,12,31, 10, 10, 10))
+            .p("cq:lastModified", new Date(1507766400000L))
         .resource("/etc/themes/foo-config/jcr:content/config")
             .p(JcrConstants.JCR_PRIMARYTYPE, LibraryConstants.ASSET_THEME_CONFIG_NAME)
             .p("baseTheme", "blue")
