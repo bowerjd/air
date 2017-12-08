@@ -196,9 +196,10 @@ public class LibraryNodeTypeImpl {
             return;
         }
         Node index = oakIndex.addNode("lsAssetThemeConfigurationIndex", "oak:QueryIndexDefinition");
+        ValueFactory factory = session.getValueFactory();
         index.setProperty("type", "property");
-        index.setProperty("propertyNames", "uniqueName");
-        index.setProperty("declaringNodeTypes", LibraryConstants.ASSET_THEME_CONFIG_NAME);
+        index.setProperty("propertyNames", new Value[]{factory.createValue("uniqueName", PropertyType.NAME)});
+        index.setProperty("declaringNodeTypes", new Value[]{factory.createValue(LibraryConstants.ASSET_THEME_CONFIG_NAME, PropertyType.NAME)});
         index.setProperty("unique", true);
         index.setProperty("reindex", true);
         session.save();
