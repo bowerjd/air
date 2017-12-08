@@ -147,7 +147,7 @@ public class LibraryWatcherImpl implements EventListener {
 
     /**
      * Finds existing asset libraries.
-     * @param session 
+     * @param session
      *
      * @throws RepositoryException
      */
@@ -199,7 +199,7 @@ public class LibraryWatcherImpl implements EventListener {
         precompileExistingThemeConfigurations();
         LOGGER.info("Finished pre-compilation");
     }
-    
+
     private void precompileExistingThemeConfigurations() {
         Collection<AssetThemeConfiguration> configs = libraryResolver.findAllThemeConfigurations();
         for (AssetThemeConfiguration config : configs) {
@@ -245,7 +245,9 @@ public class LibraryWatcherImpl implements EventListener {
                     } else if (type == Event.NODE_REMOVED) {
                         removed.add(path);
                     } else {
-                        changed.add(path);
+                        if (!added.contains(path)) {
+                            changed.add(path);
+                        }
                     }
                 }
             } catch (RepositoryException e) {
@@ -265,7 +267,7 @@ public class LibraryWatcherImpl implements EventListener {
                     for (String path : all) {
                         Asset asset = getAssetFromPath(session, path);
                         if (asset != null) {
-                            
+
                             try {
                                 loadExistingLibraries(session);
                                 precompileExistingLibraries();
@@ -275,7 +277,9 @@ public class LibraryWatcherImpl implements EventListener {
                             break;
                         }
                     }
-                } else if (added.size() > 0) {
+                }
+
+                if (added.size() > 0) {
                     for (String path : added) {
                         try {
                             session.refresh(false);
@@ -290,6 +294,7 @@ public class LibraryWatcherImpl implements EventListener {
                                     libraryResolver.load(node.getPath());
                                 } else if (isThemeConfig(node)) {
                                     libraryResolver.loadThemeConfiguration(node.getPath());
+                                    LOGGER.info("Loaded theme configuration at ({})", node.getPath());
                                 }
                             }
                         } catch (RepositoryException e) {
