@@ -53,13 +53,22 @@ end
 
 $cacheStore = Sass::CacheStores::Memory.new
 
-def compile(content, filename, loadPaths)
+def compile(content, filename, loadPaths, style, lineNumbers)
+    the_style = :compressed
+    if style == "nested"
+        the_style = :nested
+    elsif style == "expanded"
+        the_style = :expanded
+    elsif style == "compact"
+        the_style = :compact
+    end
     engine = Sass::Engine.new(content, {
-        :style => :compressed,
+        :style => the_style,
         :cache_store => $cacheStore,
         :filename => filename,
         :load_paths => loadPaths,
         :syntax => :scss,
+        :line_numbers => lineNumbers,
         :filesystem_importer => Sass::Importers::ImportAemRepository
     })
 
