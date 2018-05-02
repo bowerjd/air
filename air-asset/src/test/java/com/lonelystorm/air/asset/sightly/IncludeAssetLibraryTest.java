@@ -105,4 +105,24 @@ public class IncludeAssetLibraryTest extends AemContextTest {
         writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library/theme1.stylish-blue.v-1507766400000-v.css\">");
         assertEquals(sw.toString(), include);
     }
+
+    @Test
+    public void extraAttributes() throws Exception {
+        bindings.put("categories", "categories");
+        bindings.put("themes", "blue");
+        bindings.put("extraAttributes", "media=all onload=testfinished();");
+
+        List<AssetLibrary> libraries = new ArrayList<>();
+        libraries.add(resolver.getResource("/library").adaptTo(AssetLibrary.class));
+        when(libraryResolver.findLibrariesByCategory("categories")).thenReturn(libraries);
+
+        includeAssetLibrary.init(bindings);
+        String include = includeAssetLibrary.include();
+
+        StringWriter sw = new StringWriter();
+        PrintWriter writer = new PrintWriter(sw);
+        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library.css\" media=all onload=testfinished();>");
+        writer.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"/library/theme1.css\" media=all onload=testfinished();>");
+        assertEquals(sw.toString(), include);
+    }
 }

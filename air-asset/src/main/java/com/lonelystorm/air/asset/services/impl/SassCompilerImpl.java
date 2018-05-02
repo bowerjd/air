@@ -11,6 +11,7 @@ import static org.apache.commons.lang.StringUtils.split;
 import static org.apache.commons.lang.StringUtils.trim;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -18,8 +19,10 @@ import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.jruby.RubyException;
 import org.jruby.embed.InvokeFailedException;
 import org.jruby.embed.LocalContextScope;
@@ -36,7 +39,7 @@ import com.lonelystorm.air.asset.services.Compiler;
 import com.lonelystorm.air.asset.services.FileResolver;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 
-@Component
+@Component(immediate = true, metatype = true)
 @Service
 public class SassCompilerImpl implements Compiler {
 
@@ -51,6 +54,12 @@ public class SassCompilerImpl implements Compiler {
     @Reference
     private LibraryResolver libraryResolver;
 
+    @Property(name = "style", value = "compressed")
+    private String style;
+
+    @Property(name = "lineNumbers", boolValue = false)
+    private boolean lineNumbers;
+
     private Bundle bundle;
 
     private volatile OSGiScriptingContainer container;
@@ -59,6 +68,9 @@ public class SassCompilerImpl implements Compiler {
 
     @Activate
     public void activate(ComponentContext context) {
+        Dictionary<?, ?> properties = context.getProperties();
+        style = PropertiesUtil.toString(properties.get("style"), "compressed");
+        lineNumbers = PropertiesUtil.toBoolean(properties.get("lineNumbers"), false);
         bundle = context.getBundleContext().getBundle();
         container = new OSGiScriptingContainer(bundle, LocalContextScope.CONCURRENT, LocalVariableBehavior.TRANSIENT);
 
@@ -74,7 +86,7 @@ public class SassCompilerImpl implements Compiler {
     public String compile(Asset library, String file, String source) throws CompilerException {
         try {
             // See http://www.sass-lang.com/documentation/file.SASS_REFERENCE.html
-            return (String) container.callMethod(receiver, "compile", source, file, library.getLoadPaths());
+            return (String) container.callMethod(receiver, "compile", source, file, library.getLoadPaths(), style, lineNumbers);
         } catch (InvokeFailedException e) {
             RaiseException re = (RaiseException) e.getCause();
             RubyException ex = re.getException();

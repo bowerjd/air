@@ -47,7 +47,7 @@ public class AssetLibraryUtil {
 
         return results;
     }
- 
+
     public static AssetThemeConfiguration findThemeConfigurationByPath(LibraryResolver resolver, String configPath) {
         if (configPath == null) {
             return null;
@@ -72,4 +72,10 @@ public class AssetLibraryUtil {
         return String.format("<link rel=\"stylesheet\" type=\"text/css\" href=\"%s.%s\">", path, extension);
     }
 
+    public static String include(String path, String extension, String extraAttributes) {
+        if (extraAttributes == null) {
+            return include(path, extension);
+        }
+        return String.format("<link rel=\"stylesheet\" type=\"text/css\" href=\"%s.%s\" %s>", path, extension, extraAttributes);
+    }
 }
