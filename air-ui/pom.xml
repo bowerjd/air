@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.lonelystorm.air</groupId>
         <artifactId>air-parent</artifactId>
-        <version>0.1.9-CACI-2</version>
+        <version>0.1.9-CACI-3</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -60,16 +60,6 @@
                             <filterSource>src/main/content/META-INF/vault/filter.xml</filterSource>
                             <embeddeds>
                                 <embedded>
-                                    <groupId>org.apache.sling</groupId>
-                                    <artifactId>org.apache.sling.models.api</artifactId>
-                                    <target>/libs/lonelystorm/air/install</target>
-                                </embedded>
-                                <embedded>
-                                    <groupId>org.apache.sling</groupId>
-                                    <artifactId>org.apache.sling.models.impl</artifactId>
-                                    <target>/libs/lonelystorm/air/install</target>
-                                </embedded>
-                                <embedded>
                                     <groupId>org.jruby</groupId>
                                     <artifactId>jruby-complete</artifactId>
                                     <target>/libs/lonelystorm/air/install</target>
@@ -116,17 +106,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>air-component</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <!-- Adobe AEM -->
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.models.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.models.impl</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!-- JRuby -->

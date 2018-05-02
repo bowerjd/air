@@ -7,14 +7,14 @@ import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Set;
 
-import com.adobe.cq.sightly.WCMUse;
+import com.adobe.cq.sightly.WCMUsePojo;
 import com.lonelystorm.air.asset.models.AssetLibrary;
 import com.lonelystorm.air.asset.models.AssetTheme;
 import com.lonelystorm.air.asset.models.AssetThemeConfiguration;
 import com.lonelystorm.air.asset.services.LibraryResolver;
 import com.lonelystorm.air.asset.util.AssetLibraryUtil;
 
-public class IncludeAssetLibrary extends WCMUse {
+public class IncludeAssetLibrary extends WCMUsePojo {
 
     private Set<AssetLibrary> libraries;
 
