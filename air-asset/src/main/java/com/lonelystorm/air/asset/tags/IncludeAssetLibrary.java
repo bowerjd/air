@@ -1,8 +1,11 @@
 package com.lonelystorm.air.asset.tags;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.util.Set;
 
+import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 
@@ -47,10 +50,13 @@ public class IncludeAssetLibrary extends TagSupport {
     }
 
     @Override
-    public int doStartTag() {
+    public int doStartTag() throws JspException {
         final SlingHttpServletRequest request = TagUtil.getRequest(pageContext);
         final SlingBindings bindings = (SlingBindings) request.getAttribute(SlingBindings.class.getName());
         final SlingScriptHelper helper = bindings.getSling();
+        if (helper == null) {
+            throw new JspException(format("Failed to obtain '%s' from bindings", SlingScriptHelper.class));
+        }
 
         final LibraryResolver resolver = helper.getService(LibraryResolver.class);
         final Set<AssetLibrary> libraries = AssetLibraryUtil.categories(resolver, categories);

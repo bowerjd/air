@@ -9,10 +9,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.adobe.cq.sightly.WCMUse;
+import com.adobe.cq.sightly.WCMUsePojo;
 import com.lonelystorm.air.component.model.BsonIdentifier;
 
-public class BsonComponent extends WCMUse {
+public class BsonComponent extends WCMUsePojo {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(BsonComponent.class);
 

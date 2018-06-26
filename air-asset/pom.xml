@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.lonelystorm.air</groupId>
         <artifactId>air-parent</artifactId>
-        <version>0.1.9-CACI-2</version>
+        <version>0.1.9-CACI-5</version>
     </parent>
 
     <!-- ====================================================================== -->
@@ -84,7 +84,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>osgi.cmpn</artifactId>
         </dependency>
 
         <!-- Apache Felix -->
@@ -95,6 +95,10 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>biz.aQute.bnd</groupId>
+            <artifactId>biz.aQute.bndlib</artifactId>
         </dependency>
 
         <!-- Java EE -->
@@ -121,8 +125,13 @@
             <artifactId>org.apache.sling.models.impl</artifactId>
         </dependency>
         <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.adobe.aem</groupId>
-            <artifactId>aem-api</artifactId>
+            <artifactId>uber-jar</artifactId>
+            <classifier>apis</classifier>
         </dependency>
 
         <!-- JRuby -->
